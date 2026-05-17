@@ -37,6 +37,40 @@
 
 ## 5.2 entity 트리
 
+```mermaid
+%% caption: 비행체 분류 트리 — vehicle을 뿌리로
+graph TD
+  V[vehicle]
+  V --> D[drone]
+  V --> GS[ground_station]
+  D --> Q[quadcopter]
+  D --> FW[fixed_wing]
+  D --> H[hybrid]
+```
+
+```mermaid
+%% caption: 페이로드·능력 분류 트리 — 4개의 가지
+graph TD
+  P[payload]
+  P --> S[sensor]
+  P --> DP[delivery_payload]
+  S --> CM[camera]
+  S --> LD[lidar]
+  S --> TC[thermal_camera]
+  
+  C[capability]
+  C --> SC[sensing_capability]
+  C --> CC[communication_capability]
+  C --> AC[autonomy_capability]
+  C --> PC[propulsion_capability]
+  SC --> NO[night_optical]
+  SC --> TI[thermal_imaging]
+  CC --> MR[mesh_relay]
+  AC --> FL[formation_lead]
+  AC --> OA[obstacle_avoidance]
+```
+
+
 도메인 분석이 끝나는 자리에서, 가장 먼저 손이 가는 것이 *분류 트리*다. *세상에는 어떤 것들이 있는가*를 묻는 일이기 때문이다. 드론 도메인을 보면 — *비행체*가 있고, *센서*가 있고, *관제소*가 있다. 각각이 *자기만의 가지*를 친다. 비행체 가지에서는 quadcopter·fixed_wing·hybrid가 갈라지고, 센서 가지에서는 camera·lidar·thermal_camera가 갈라진다.
 
 이 트리를 짤 때 *가장 자주 실수하는 자리*는 — *내가 지금 보는 도메인의 단순화*가 아니라 *학계의 완벽한 분류 체계*를 옮기려 하는 자리다. SUMO·DOLCE 같은 상위 온톨로지가 매력적이지만 — *이 책의 한 도메인을 짜는 자리*에서는 거의 항상 *과잉*이다. *우리 도메인에서 의미 있는 분기*만 짠다. 더 상위가 필요하면 — *그때 추가하면 된다*.
@@ -239,6 +273,19 @@ relation role_requires_capability,
 
 *Participant Role Pattern + Time-Indexed*의 결합.
 
+```mermaid
+%% caption: assigned_to — 4자리 N항 관계의 모양
+graph LR
+  D["Drone<br/>(assigned_drone)"]
+  M["Mission<br/>(assignment_mission)"]
+  R["Role<br/>(played_role)"]
+  AT(("assigned_to<br/>start / end"))
+  D --- AT
+  M --- AT
+  R --- AT
+```
+
+
 ```typeql
   relation assigned_to,
     relates assigned_drone @card(1..1),
@@ -351,9 +398,7 @@ relation communicates_with,
   attribute formation_started_at, value datetime;
 
 commit;
-```
-
-#### ◇ 설계 결정 — formation을 attribute로
+```#### ◇ 설계 결정 — formation을 attribute로
 
 **대안: formation을 entity로**
 ```typeql
@@ -644,4 +689,19 @@ define
 - 스키마 진화 — 비파괴·호환·파괴 변경
 - 모듈화와 Schema-as-Code
 
-다음 장 — **데이터 채우기**. 5장의 빈 스키마에 *12대 드론 + 1개 임무 + 19개 통신 링크*가 들어온다. *A-Box vs T-Box*의 자리.
+다음 장 — **데이터 채우기**. 5장의 빈 스키마에 *12대 드론 + 1개 임무 + 16개 통신 링크*가 들어온다. *A-Box vs T-Box*의 자리.
+
+---
+
+## 연습문제
+
+**문제 1 (분류 트리 확장).** 이 책의 비행체 분류에 *VTOL (Vertical Take-Off and Landing)*을 추가하려 한다. 어느 자리에 두는 게 자연스러운가? `vehicle → drone → ?` 또는 별도 가지? 트레이드오프를 두 줄로.
+
+**문제 2 (역할 vs 속성).** `mission_role`을 *entity + @values*로 짠 대신, `drone`의 *속성*으로 다음과 같이 짤 수 있었다:
+```typeql
+attribute current_role, value string @values("leader","observer","relay","rescuer","follower");
+drone owns current_role;
+```
+이 설계의 *치명적 문제*는 무엇인가? 8장 시나리오와 연결지어 답하라.
+
+**문제 3 (N항 관계 확장).** `has_capability`에 *능력 획득 일자(acquired_date)*를 추가하려면 어떤 자리에 owns를 박나? 기존 데이터에 *NULL 처리*는 어떻게?

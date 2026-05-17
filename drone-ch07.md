@@ -14,6 +14,21 @@
 
 이론적 자리: *함수 합성의 형식 의미론*과 *쿼리 최적화*.
 
+```mermaid
+%% caption: 네 함수의 의존 관계 — 8장에서 합성될 자리
+graph LR
+  S[6장 데이터]
+  S --> F1["7.1<br/>drones_with_capability"]
+  S --> F2["7.2<br/>leader_candidates"]
+  S --> F3["7.3<br/>reachable_through_swarm"]
+  S --> F4["7.4<br/>drones_with_role"]
+  F1 --> X[(8.2.4<br/>대체 드론<br/>도출)]
+  F2 --> X
+  F3 --> X
+  F4 -.-> Y[8.6 임무 재할당]
+```
+
+
 ---
 
 ## 7.1 함수 1 — 능력 매칭 `drones_with_capability`
@@ -689,3 +704,13 @@ TypeDB의 함수는 *기본적으로 on-the-fly* — 호출 시점에 fixpoint �
 - Materialization vs on-the-fly의 트레이드오프
 
 다음 장 — **시나리오 클라이맥스**. 이 네 함수가 *동시에 호출*되어, *한 드론이 손실된 순간 영향이 자동으로 풀려나가는* 자리. 그리고 — *다양한 사건 시나리오*까지 본격 시연.
+
+---
+
+## 연습문제
+
+**문제 1 (함수 확장).** `drones_with_capability($cap, $min_grade)` 를 *두 개의 능력 동시 충족*으로 확장하라 (예: night_optical 3+ AND obstacle_avoidance 3+). TypeQL로 시그니처와 본문을 짜라.
+
+**문제 2 (재귀 깊이 제한).** 7.3의 `reachable_through_swarm`은 깊이 제한 없이 재귀한다. *최대 3홉*까지만 탐색하도록 변형하려면 어떤 자리를 바꿔야 하나?
+
+**문제 3 (합성 한계).** *세 함수의 교집합*이 *빈 결과*를 낼 때 — 시스템이 답해야 하는 것은? 분석가에게 어떤 정보를 *대신* 보여줘야 하나?

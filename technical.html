@@ -10,6 +10,7 @@
 <link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/marked@12/marked.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
 <style>
 :root{
   --font-serif:'Noto Serif KR','Source Serif Pro','Iowan Old Style',Georgia,serif;
@@ -158,6 +159,12 @@ main{margin-left:320px;padding:140px 0 80px;transition:margin .35s}
 .chapter pre::-webkit-scrollbar-thumb:hover{background:var(--text-soft)}
 .chapter table{width:100%;border-collapse:collapse;margin:28px 0;font-size:.93em;font-family:var(--font-sans);border:1px solid var(--border-soft);border-radius:10px;overflow:hidden}
 @media(max-width:720px){.chapter table{display:block;overflow-x:auto;white-space:nowrap;border-radius:8px}}
+.mermaid-wrap{margin:36px 0;background:var(--bg-elevated);border:1px solid var(--border-soft);border-radius:12px;padding:28px 20px;overflow-x:auto;-webkit-overflow-scrolling:touch;transition:background .4s,border-color .4s}
+.mermaid-wrap .caption{font-family:var(--font-sans);font-size:11px;color:var(--text-soft);letter-spacing:.16em;text-transform:uppercase;text-align:center;margin-bottom:18px;font-weight:600}
+.mermaid{text-align:center;font-family:var(--font-sans)!important}
+.mermaid svg{max-width:100%;height:auto}
+[data-theme="dark"] .mermaid .node rect,[data-theme="dark"] .mermaid .node polygon,[data-theme="dark"] .mermaid .node circle{filter:brightness(.95)}
+@media(max-width:640px){.mermaid-wrap{padding:20px 12px;margin:28px -4px}.mermaid-wrap .caption{font-size:10px;letter-spacing:.12em}}
 .chapter table th,.chapter table td{padding:12px 16px;text-align:left;border-bottom:1px solid var(--border-soft)}
 .chapter table tr:last-child td{border-bottom:none}
 .chapter table th{font-weight:600;background:var(--bg-soft);color:var(--text);font-size:11px;letter-spacing:.08em;text-transform:uppercase}
@@ -516,8 +523,21 @@ fun all_suppliers_of($company: company) -> { company }:
 
 #### 4원소의 결합
 
-```
-PolyModel = 객체지향(상속) + 관계형(스키마 강제) + 그래프(N항 관계) + 함수형(쿼리)
+```mermaid
+%% caption: PolyModel — 네 패러다임이 한 시스템 안에서
+graph TB
+  subgraph TDB["TypeDB 3.0 — PolyModel"]
+    direction LR
+    OO["객체지향<br/>entity 상속<br/>(LSP)"]
+    RM["관계형<br/>스키마·제약 강제<br/>(@card @range)"]
+    GR["그래프<br/>일급 N항 관계<br/>(Davidson)"]
+    FN["함수형<br/>선언적·재귀 쿼리<br/>(Datalog)"]
+  end
+  D["복합 도메인<br/>(드론·반도체·의료·법무)"]
+  OO --> D
+  RM --> D
+  GR --> D
+  FN --> D
 ```
 
 이 네 가지가 *각각* 다른 패러다임의 강점이고 — *동시에* 한 시스템 안에 있는 게 TypeDB의 자리.
@@ -3008,6 +3028,17 @@ Datalog는 *학술의 자리*만이 아니다. 산업에서도 살아 있다:
 
 ---
 
+```mermaid
+%% caption: 이 책이 짤 12대 드론 군집의 구성
+graph TD
+  S["12대 드론 군집<br/>임무: 산악 수색"]
+  S --> L["리더 2대<br/>DRN-001 (leader)<br/>DRN-002 (follower/backup)"]
+  S --> O["광학 관측 4대<br/>DRN-003 ~ 006<br/>야간 광학 4등급"]
+  S --> T["열화상 2대<br/>DRN-007 ~ 008<br/>thermal_imaging 5등급"]
+  S --> R["통신 중계 3대<br/>DRN-009 ~ 011<br/>mesh_relay 5등급"]
+  S --> P["예비 1대<br/>DRN-012<br/>다목적 3등급"]
+```
+
 ## 들어가며
 
 *도메인을 모르고 스키마를 짤 수 없다*. 이것은 온톨로지 작업의 가장 첫 번째 규칙이다. 그리고 거의 모든 실패의 *원인 자리*다.
@@ -3411,7 +3442,17 @@ link           드론 사이의 통신 (관계)
 - *12개 Competency Questions*
 - *6개 핵심 어휘*
 
-다음 장 — **스키마 짓기**. 6개 어휘가 *entity·관계·속성*의 자리에 박힌다. 그리고 — 각 *설계 결정의 트레이드오프*가 본격적으로 토론된다.</script>
+다음 장 — **스키마 짓기**. 6개 어휘가 *entity·관계·속성*의 자리에 박힌다. 그리고 — 각 *설계 결정의 트레이드오프*가 본격적으로 토론된다.
+
+---
+
+## 연습문제
+
+**문제 1 (CQ 짜기).** 본인이 잘 아는 도메인을 하나 고르고, 이 장에서 본 *12개 Competency Questions* 패턴으로 *5개 CQ*를 짜보라. (예: 의료라면 *환자 X의 알레르기 이력에 부합하는 약물은?*)
+
+**문제 2 (도메인 단순화).** 본인 도메인의 *짤 것 5가지*와 *짜지 않을 것 3가지*를 정리하라. 단순화의 *이유*를 한 줄씩.
+
+**문제 3 (방법론 매칭).** METHONTOLOGY·OnToKnowledge·NeOn 중 본인 도메인에 가장 적합한 방법론은? 이유 두 줄.</script>
 <script type="text/markdown" id="ch05-md"># 제5장. 스키마 짓기
 
 ## 들어가며
@@ -3450,6 +3491,40 @@ link           드론 사이의 통신 (관계)
 ---
 
 ## 5.2 entity 트리
+
+```mermaid
+%% caption: 비행체 분류 트리 — vehicle을 뿌리로
+graph TD
+  V[vehicle]
+  V --> D[drone]
+  V --> GS[ground_station]
+  D --> Q[quadcopter]
+  D --> FW[fixed_wing]
+  D --> H[hybrid]
+```
+
+```mermaid
+%% caption: 페이로드·능력 분류 트리 — 4개의 가지
+graph TD
+  P[payload]
+  P --> S[sensor]
+  P --> DP[delivery_payload]
+  S --> CM[camera]
+  S --> LD[lidar]
+  S --> TC[thermal_camera]
+  
+  C[capability]
+  C --> SC[sensing_capability]
+  C --> CC[communication_capability]
+  C --> AC[autonomy_capability]
+  C --> PC[propulsion_capability]
+  SC --> NO[night_optical]
+  SC --> TI[thermal_imaging]
+  CC --> MR[mesh_relay]
+  AC --> FL[formation_lead]
+  AC --> OA[obstacle_avoidance]
+```
+
 
 도메인 분석이 끝나는 자리에서, 가장 먼저 손이 가는 것이 *분류 트리*다. *세상에는 어떤 것들이 있는가*를 묻는 일이기 때문이다. 드론 도메인을 보면 — *비행체*가 있고, *센서*가 있고, *관제소*가 있다. 각각이 *자기만의 가지*를 친다. 비행체 가지에서는 quadcopter·fixed_wing·hybrid가 갈라지고, 센서 가지에서는 camera·lidar·thermal_camera가 갈라진다.
 
@@ -3653,6 +3728,19 @@ relation role_requires_capability,
 
 *Participant Role Pattern + Time-Indexed*의 결합.
 
+```mermaid
+%% caption: assigned_to — 4자리 N항 관계의 모양
+graph LR
+  D["Drone<br/>(assigned_drone)"]
+  M["Mission<br/>(assignment_mission)"]
+  R["Role<br/>(played_role)"]
+  AT(("assigned_to<br/>start / end"))
+  D --- AT
+  M --- AT
+  R --- AT
+```
+
+
 ```typeql
   relation assigned_to,
     relates assigned_drone @card(1..1),
@@ -3765,9 +3853,7 @@ relation communicates_with,
   attribute formation_started_at, value datetime;
 
 commit;
-```
-
-#### ◇ 설계 결정 — formation을 attribute로
+```#### ◇ 설계 결정 — formation을 attribute로
 
 **대안: formation을 entity로**
 ```typeql
@@ -4058,7 +4144,22 @@ define
 - 스키마 진화 — 비파괴·호환·파괴 변경
 - 모듈화와 Schema-as-Code
 
-다음 장 — **데이터 채우기**. 5장의 빈 스키마에 *12대 드론 + 1개 임무 + 19개 통신 링크*가 들어온다. *A-Box vs T-Box*의 자리.</script>
+다음 장 — **데이터 채우기**. 5장의 빈 스키마에 *12대 드론 + 1개 임무 + 16개 통신 링크*가 들어온다. *A-Box vs T-Box*의 자리.
+
+---
+
+## 연습문제
+
+**문제 1 (분류 트리 확장).** 이 책의 비행체 분류에 *VTOL (Vertical Take-Off and Landing)*을 추가하려 한다. 어느 자리에 두는 게 자연스러운가? `vehicle → drone → ?` 또는 별도 가지? 트레이드오프를 두 줄로.
+
+**문제 2 (역할 vs 속성).** `mission_role`을 *entity + @values*로 짠 대신, `drone`의 *속성*으로 다음과 같이 짤 수 있었다:
+```typeql
+attribute current_role, value string @values("leader","observer","relay","rescuer","follower");
+drone owns current_role;
+```
+이 설계의 *치명적 문제*는 무엇인가? 8장 시나리오와 연결지어 답하라.
+
+**문제 3 (N항 관계 확장).** `has_capability`에 *능력 획득 일자(acquired_date)*를 추가하려면 어떤 자리에 owns를 박나? 기존 데이터에 *NULL 처리*는 어떻게?</script>
 <script type="text/markdown" id="ch06-md"># 제6장. 데이터 채우기
 
 ## 들어가며
@@ -4361,6 +4462,45 @@ commit;
 
 ## 6.6 통신 링크 데이터
 
+```mermaid
+%% caption: 12대 군집의 메시 네트워크 위상 — 16개 링크
+graph TB
+  D01["DRN-001<br/>(leader)"]:::leader
+  D02["DRN-002<br/>(follower)"]:::leader
+  D03["DRN-003<br/>(obs)"]:::obs
+  D04["DRN-004<br/>(obs)"]:::obs
+  D05["DRN-005<br/>(obs)"]:::obs
+  D06["DRN-006<br/>(obs)"]:::obs
+  D07["DRN-007<br/>(thermal)"]:::thermal
+  D08["DRN-008<br/>(thermal)"]:::thermal
+  D09["DRN-009<br/>(relay)"]:::relay
+  D10["DRN-010<br/>(relay)"]:::relay
+  D11["DRN-011<br/>(relay)"]:::relay
+  
+  D01 --- D02
+  D01 --- D09
+  D01 --- D10
+  D01 --- D11
+  D02 --- D09
+  D02 --- D10
+  D02 --- D11
+  D03 --- D09
+  D04 --- D09
+  D05 --- D10
+  D06 --- D10
+  D07 --- D11
+  D08 --- D11
+  D09 --- D10
+  D10 --- D11
+  D09 --- D11
+  
+  classDef leader fill:#d4af37,stroke:#8b6914,color:#2a2a2a
+  classDef obs fill:#7da3c5,stroke:#3d6b8d,color:#fff
+  classDef thermal fill:#c87b6b,stroke:#8a4434,color:#fff
+  classDef relay fill:#8aa67a,stroke:#4a6b3a,color:#fff
+```
+
+
 메시 네트워크 구조 (단순화):
 - 리더 2대가 *중계 드론 3대 모두*와 연결
 - 관측·열화상 드론은 *가장 가까운 중계 드론*과 연결
@@ -4481,6 +4621,16 @@ fetch $sid;
 
 ---
 
+## 연습문제
+
+**문제 1 (스케일).** 이 책은 12대를 다룬다. *24대로 확장*한다면 — 능력 매듭 수, 링크 수, 역할 매듭 수가 *각각 몇 개*로 늘어날 것 같은가? (단순 2배는 아닐 수도. *왜*인지 한 줄로)
+
+**문제 2 (시간 변화).** 임무 진행 중 DRN-005의 *위치*가 1초마다 바뀐다. 이걸 데이터에 박는 *세 가지 모델링 선택*은? 각각의 trade-off는?
+
+**문제 3 (품질 저하 시나리오).** `link_quality`가 *0.5 이하*로 떨어지는 자리를 어떻게 자동 감지하나? 6.7 Check 패턴 응용.
+
+---
+
 ## 6.8 ◇ 이론 절 — 데이터 출처(Provenance)
 
 ### Provenance란
@@ -4560,6 +4710,21 @@ define
 이 장은 단순히 *함수를 정의하는 자리*가 아니다. 각 함수의 *3~5가지 사용 사례*, *성능 특성*, *대안 구현*, 그리고 *5가지 합성 패턴*까지 — *진짜 함수를 짜는 사고법*이 본진이다. 그리고 — *세 함수가 합성될 때* 8장의 클라이맥스 자리가 어떻게 자연스럽게 풀려나가는지를, 이 장이 *미리 준비한다*.
 
 이론적 자리: *함수 합성의 형식 의미론*과 *쿼리 최적화*.
+
+```mermaid
+%% caption: 네 함수의 의존 관계 — 8장에서 합성될 자리
+graph LR
+  S[6장 데이터]
+  S --> F1["7.1<br/>drones_with_capability"]
+  S --> F2["7.2<br/>leader_candidates"]
+  S --> F3["7.3<br/>reachable_through_swarm"]
+  S --> F4["7.4<br/>drones_with_role"]
+  F1 --> X[(8.2.4<br/>대체 드론<br/>도출)]
+  F2 --> X
+  F3 --> X
+  F4 -.-> Y[8.6 임무 재할당]
+```
+
 
 ---
 
@@ -5235,7 +5400,17 @@ TypeDB의 함수는 *기본적으로 on-the-fly* — 호출 시점에 fixpoint �
 - Stratified negation — 안전성 보장
 - Materialization vs on-the-fly의 트레이드오프
 
-다음 장 — **시나리오 클라이맥스**. 이 네 함수가 *동시에 호출*되어, *한 드론이 손실된 순간 영향이 자동으로 풀려나가는* 자리. 그리고 — *다양한 사건 시나리오*까지 본격 시연.</script>
+다음 장 — **시나리오 클라이맥스**. 이 네 함수가 *동시에 호출*되어, *한 드론이 손실된 순간 영향이 자동으로 풀려나가는* 자리. 그리고 — *다양한 사건 시나리오*까지 본격 시연.
+
+---
+
+## 연습문제
+
+**문제 1 (함수 확장).** `drones_with_capability($cap, $min_grade)` 를 *두 개의 능력 동시 충족*으로 확장하라 (예: night_optical 3+ AND obstacle_avoidance 3+). TypeQL로 시그니처와 본문을 짜라.
+
+**문제 2 (재귀 깊이 제한).** 7.3의 `reachable_through_swarm`은 깊이 제한 없이 재귀한다. *최대 3홉*까지만 탐색하도록 변형하려면 어떤 자리를 바꿔야 하나?
+
+**문제 3 (합성 한계).** *세 함수의 교집합*이 *빈 결과*를 낼 때 — 시스템이 답해야 하는 것은? 분석가에게 어떤 정보를 *대신* 보여줘야 하나?</script>
 <script type="text/markdown" id="ch08-md"># 제8장. 시나리오 — 군집의 사건 대응
 
 ## 들어가며
@@ -5447,6 +5622,34 @@ drone_loss(DRN-001) at 17:23:00, cause: communication_failure, severity: severe
 
 5분 28초. 한 드론이 손실되고 — 군집이 *복구되기까지*의 시간. 사람이 *손으로* 같은 일을 한다면 — 베테랑 분석가도 *15분 이상* 걸린다. 능력 트리에서 검색하고, 통신 표를 보고, 후보를 비교하고. 그 *시간 단축의 자리*가 — 이 책이 짠 시스템의 *진짜 가치*다.
 
+```mermaid
+%% caption: 시나리오 A — 5단계 사건 대응 시퀀스
+sequenceDiagram
+  participant A as 분석가
+  participant DB as TypeDB
+  participant F as 7장 함수
+  
+  Note over A,F: T+0초 — 사건 등록
+  A->>DB: drone_loss(DRN-001) insert
+  
+  Note over A,F: T+10초 — 영향 자동 식별
+  DB->>F: Q1: 어느 역할 공백?
+  DB->>F: Q2: 어느 링크 끊김?
+  DB->>F: Q3: 메시 도달 가능?
+  F-->>A: leader 공백, 4개 링크, 우회 살아있음
+  
+  Note over A,F: T+30초 — 대체 후보 도출
+  DB->>F: 세 함수 교집합 호출
+  F-->>A: DRN-002 추천 + 이유
+  
+  Note over A,F: T+1분 — 분석가 판단 (12초)
+  A->>A: 위치·배터리·심각도 확인
+  
+  Note over A,F: T+5분 — 재할당 적용
+  A->>DB: 재할당 승인
+  DB-->>A: 군집 재구성 완료
+```
+
 #### 시간축 요약표
 
 | 시점 | 단계 | 시스템 작업 | 인간 작업 |
@@ -5545,6 +5748,31 @@ match
   
   $cand has serial_id $sid;
 fetch $sid;
+```
+
+```mermaid
+%% caption: 한 사건의 영향이 자동으로 풀려나가는 그래프
+graph LR
+  E["drone_loss<br/>DRN-001"]:::event
+  E --> R["leader 자리<br/>공백"]:::impact
+  E --> L1["d01-d02 링크"]:::link
+  E --> L2["d01-d09 링크"]:::link
+  E --> L3["d01-d10 링크"]:::link
+  E --> L4["d01-d11 링크"]:::link
+  
+  R --> Q["7장 함수 합성<br/>(3중 교집합)"]:::function
+  Q --> C["DRN-002<br/>대체 후보"]:::solution
+  
+  L2 -.-> M["메시 우회 경로<br/>(reachable 함수)"]:::function
+  L3 -.-> M
+  L4 -.-> M
+  M --> OK["통신 보존 확인"]:::solution
+  
+  classDef event fill:#c87b6b,stroke:#8a4434,color:#fff
+  classDef impact fill:#d4af37,stroke:#8b6914,color:#2a2a2a
+  classDef link fill:#a8a4a0,stroke:#5a5853,color:#fff
+  classDef function fill:#7da3c5,stroke:#3d6b8d,color:#fff
+  classDef solution fill:#8aa67a,stroke:#4a6b3a,color:#fff
 ```
 
 **세 함수의 교집합**:
@@ -6047,7 +6275,17 @@ TypeDB의 함수는 *명시적 TMS가 아니다*. 그러나 — *backward chaini
 - Truth maintenance — 데이터 변경 시 추론 일관성
 - Materialization 트레이드오프
 
-다음 장 — *9장 정리와 다음 발걸음*. 책 전체의 *네 가지 도구가 어떻게 회수되었는가*, 자매 책과의 비교, 그리고 *OWL·SHACL·Description Logic*으로의 다음 자리.</script>
+다음 장 — *9장 정리와 다음 발걸음*. 책 전체의 *네 가지 도구가 어떻게 회수되었는가*, 자매 책과의 비교, 그리고 *OWL·SHACL·Description Logic*으로의 다음 자리.
+
+---
+
+## 연습문제
+
+**문제 1 (시나리오 변형).** *DRN-002까지 동시 손실*된다면 — 8.2.4의 교집합 쿼리가 어떤 결과를 낼 것 같은가? 시스템이 *대안적 답*을 내려면 어떤 함수를 더 짜야 하나?
+
+**문제 2 (사건 우선순위).** 시나리오 A(리더 손실)와 시나리오 D(임무 우선순위 변경)가 *동시에* 발생한다면 — 시스템이 어느 것을 먼저 처리해야 하나? `severity` 속성을 어떻게 설계하면 자동 우선순위가 가능한가?
+
+**문제 3 (Truth Maintenance).** 분석가가 *재할당 승인을 취소*한다면 — 데이터 모델 위에서 어떤 *되돌리기 연산*이 필요한가? 8.2.5의 `assignment_end` 박힌 매듭은 어떻게 되돌리나?</script>
 <script type="text/markdown" id="ch09-md"># 제9장. 정리 — 네 도구의 회수, 그리고 다음 자리
 
 ## 들어가며
@@ -6445,6 +6683,104 @@ pip install typedb-driver
 
 ---
 
+## 부록 D. TypeDB 초보자 함정 FAQ
+
+처음 TypeDB를 손에 잡은 사람이 *자주 막히는 자리*를 정리. 책의 예제를 따라 치다 어디서 에러가 나면 — 먼저 이 자리를 본다.
+
+### Q1. `transaction schema` vs `transaction write` vs `transaction read` — 언제 어느 것?
+
+세 가지 트랜잭션 모드의 자리가 다르다:
+
+- **`transaction schema {db}`** — 스키마(타입 정의) 변경. `define`·`undefine` 사용. 5장에서 사용.
+- **`transaction write {db}`** — 데이터 변경. `insert`·`delete`·`update` 사용. 6장과 8장에서 사용.
+- **`transaction read {db}`** — 읽기 전용. `match`·`fetch`·함수 호출. 7장에서 주로 사용.
+
+*막히는 자리*: `define`을 `transaction write` 안에서 실행하면 *권한 없음*. *먼저 schema 모드로 진입*해야 함.
+
+### Q2. "Role not defined for relation" 에러
+
+원인: `relation R, relates X`로 선언한 자리에 *X를 plays하는 entity가 없음*. 예:
+
+```typeql
+# 잘못된 자리
+define
+  relation assigned_to, relates assigned_drone;
+  # drone plays assigned_to:assigned_drone;  ← 이 줄이 빠짐!
+
+insert
+  (assigned_drone: $d) isa assigned_to;  # 에러
+```
+
+*해결*: 관계에서 자리(role)를 선언했으면 — *반드시 어느 entity가 그 자리를 plays*하는지도 선언.
+
+### Q3. 스키마 변경 후 기존 데이터는?
+
+- *비파괴 변경* (속성 추가, 새 entity 추가) → 기존 데이터 *유지*.
+- *호환 변경* (`@card` 완화, optional 변경) → 기존 데이터 *유지* (단 새 제약 위반 시 에러).
+- *파괴 변경* (entity 삭제, role 삭제, `@card` 강화) → 기존 데이터가 *조건에 부합해야* 변경 가능. 안 되면 *수동으로 데이터 마이그레이션* 필요.
+
+운영 환경에서는 — *파괴 변경 전에 반드시 백업*.
+
+### Q4. 같은 attribute을 여러 entity가 owns — 가능?
+
+가능하고, *권장됨*. 예: `serial_id`를 `drone`도 `ground_station`도 둘 다 `owns`.
+
+```typeql
+drone owns serial_id @card(1..1);
+ground_station owns serial_id @card(1..1);
+```
+
+이게 *값 공유*는 아니다. 같은 *attribute 타입*을 *서로 다른 entity*가 각자 따로 쓰는 것. 단 — *unique 제약*은 별도. 같은 `serial_id` 값을 *두 entity가 동시에 가질 수 있는가*는 *추가 제약*이 결정.
+
+### Q5. `@card(1..1)` vs `@card(0..1)` — 언제 차이가 나나
+
+- `@card(1..1)` — *반드시 정확히 1개*. 데이터 입력 시 빠지면 *에러*. 운영 식별자(serial_id 같은 자리)에 권장.
+- `@card(0..1)` — *0개 또는 1개*. NULL 허용. 옵션 속성(manufacturer 같은 자리)에 권장.
+
+*막히는 자리*: schema에 `@card(1..1)`로 선언했는데 데이터에 안 넣으면 — *insert 자체가 실패*. 초기 데이터 import 시 자주 만나는 자리.
+
+### Q6. 재귀 함수의 stack overflow
+
+`fun X(...) -> { ... }: match ... or match ...; let $x in X(...);`
+
+이 패턴은 *기저 케이스*가 정확해야 한다. 잘못된 자리:
+
+```typeql
+# 위험한 자리 — 사이클 그래프에서 무한 재귀
+fun all_reachable($d: drone) -> { drone }:
+  match (link_endpoint: $d, link_endpoint: $next) isa communicates_with;
+  return { $next };
+  or
+  match (link_endpoint: $d, link_endpoint: $mid) isa communicates_with;
+       let $next in all_reachable($mid);
+  return { $next };
+```
+
+A↔B↔A 같은 *사이클*이 있으면 — 무한 재귀. *방문 노드 추적*이 필요한 자리. TypeDB의 함수는 *Fixpoint 의미론*으로 자동 종료하긴 하지만 — 일반적으로 *명시적 종료 조건*을 두는 게 안전.
+
+### Q7. *하위 타입의 attribute 제거*가 가능한가?
+
+```typeql
+entity vehicle, owns model_name;
+entity drone sub vehicle;
+# drone에서 model_name을 빼고 싶다면?
+```
+
+*불가능*. Liskov 치환 원칙(LSP). 상위가 약속한 것을 하위가 어길 수 없음. 만약 model_name이 *drone에 부적합*하다면 — 분류 트리 자체를 재설계해야 한다 (상위에서 model_name 빼고, model_name이 필요한 자리만 별도 가지로).
+
+### Q8. 대용량 데이터 로딩 — 어떻게?
+
+12대 정도는 *한 트랜잭션*으로 가능. 그러나 *1만 대 이상*이면:
+
+1. **배치 분할** — 1000개씩 commit
+2. **Python/Java driver의 batch API** 사용 (`typedb-driver`)
+3. **인덱싱** — 자주 검색되는 attribute에 미리 인덱스 (TypeDB 3.0은 일부 attribute에 자동)
+4. **schema commit과 data commit 분리** — 스키마 먼저 안정시키고 데이터 import
+
+본격 운영 시 — 공식 문서의 *bulk loading* 절을 참고.
+
+---
+
 — 끝.</script>
 
 <script>
@@ -6481,6 +6817,64 @@ document.querySelectorAll('script[type="text/markdown"]').forEach(s=>{
     h1.parentNode.insertBefore(eyebrow,h1);
   }
 });
+
+// Mermaid 도식 처리: pre code.language-mermaid → .mermaid-wrap > .mermaid
+function processMermaidBlocks(){
+  document.querySelectorAll('pre code.language-mermaid').forEach(code=>{
+    const pre=code.parentElement;
+    const wrap=document.createElement('div');
+    wrap.className='mermaid-wrap';
+    const firstLine=code.textContent.split('\n')[0];
+    const captionMatch=firstLine.match(/^%%\s*caption:\s*(.+)$/);
+    if(captionMatch){
+      const cap=document.createElement('div');
+      cap.className='caption';
+      cap.textContent=captionMatch[1].trim();
+      wrap.appendChild(cap);
+    }
+    const div=document.createElement('div');
+    div.className='mermaid';
+    const source=captionMatch?code.textContent.split('\n').slice(1).join('\n'):code.textContent;
+    div.dataset.source=source;
+    div.textContent=source;
+    wrap.appendChild(div);
+    pre.replaceWith(wrap);
+  });
+}
+function initMermaid(){
+  if(typeof mermaid==='undefined') return;
+  const isDark=document.body.dataset.theme==='dark';
+  mermaid.initialize({
+    startOnLoad:false,
+    securityLevel:'loose',
+    theme:'base',
+    fontFamily:'Inter, Pretendard Variable, sans-serif',
+    themeVariables:isDark?{
+      primaryColor:'#252d39',primaryTextColor:'#d4d8de',primaryBorderColor:'#4a5568',
+      lineColor:'#6a7282',secondaryColor:'#1e2530',tertiaryColor:'#1a1f29',
+      background:'#1a1f29',mainBkg:'#252d39',secondBkg:'#2a3340',
+      tertiaryBkg:'#1e2530',nodeBorder:'#5a6478',clusterBkg:'#1e2530',
+      clusterBorder:'#4a5568',edgeLabelBackground:'#1a1f29',
+      titleColor:'#e6edf3',textColor:'#d4d8de',labelTextColor:'#d4d8de',
+      noteTextColor:'#d4d8de',noteBkgColor:'#2a3340',noteBorderColor:'#5a6478'
+    }:{
+      primaryColor:'#faf8f4',primaryTextColor:'#3a3a3a',primaryBorderColor:'#b8b4b0',
+      lineColor:'#a8a4a0',secondaryColor:'#f0ece5',tertiaryColor:'#fdfcfa',
+      background:'#fdfcfa',mainBkg:'#faf8f4',secondBkg:'#f5f0e8',
+      tertiaryBkg:'#fdfcfa',nodeBorder:'#b8b4b0',clusterBkg:'#f5f0e8',
+      clusterBorder:'#c8c4c0',edgeLabelBackground:'#fdfcfa',
+      titleColor:'#3a3a3a',textColor:'#3a3a3a',labelTextColor:'#3a3a3a',
+      noteTextColor:'#3a3a3a',noteBkgColor:'#f0ece5',noteBorderColor:'#b8b4b0'
+    }
+  });
+  document.querySelectorAll('.mermaid').forEach(d=>{
+    d.removeAttribute('data-processed');
+    if(d.dataset.source) d.innerHTML=d.dataset.source;
+  });
+  try{mermaid.run({querySelector:'.mermaid'});}catch(e){console.error('Mermaid error:',e);}
+}
+processMermaidBlocks();
+initMermaid();
 
 document.querySelectorAll('pre code').forEach(b=>{
   try{hljs.highlightElement(b);}catch(e){}
@@ -6539,6 +6933,7 @@ if(themeBtn) themeBtn.onclick=()=>{
   const next=document.body.dataset.theme==='dark'?'light':'dark';
   applyTheme(next);
   localStorage.setItem('theme',next);
+  initMermaid();
 };
 
 let fs=parseInt(localStorage.getItem('fontSize')||'17');

@@ -300,6 +300,45 @@ commit;
 
 ## 6.6 통신 링크 데이터
 
+```mermaid
+%% caption: 12대 군집의 메시 네트워크 위상 — 16개 링크
+graph TB
+  D01["DRN-001<br/>(leader)"]:::leader
+  D02["DRN-002<br/>(follower)"]:::leader
+  D03["DRN-003<br/>(obs)"]:::obs
+  D04["DRN-004<br/>(obs)"]:::obs
+  D05["DRN-005<br/>(obs)"]:::obs
+  D06["DRN-006<br/>(obs)"]:::obs
+  D07["DRN-007<br/>(thermal)"]:::thermal
+  D08["DRN-008<br/>(thermal)"]:::thermal
+  D09["DRN-009<br/>(relay)"]:::relay
+  D10["DRN-010<br/>(relay)"]:::relay
+  D11["DRN-011<br/>(relay)"]:::relay
+  
+  D01 --- D02
+  D01 --- D09
+  D01 --- D10
+  D01 --- D11
+  D02 --- D09
+  D02 --- D10
+  D02 --- D11
+  D03 --- D09
+  D04 --- D09
+  D05 --- D10
+  D06 --- D10
+  D07 --- D11
+  D08 --- D11
+  D09 --- D10
+  D10 --- D11
+  D09 --- D11
+  
+  classDef leader fill:#d4af37,stroke:#8b6914,color:#2a2a2a
+  classDef obs fill:#7da3c5,stroke:#3d6b8d,color:#fff
+  classDef thermal fill:#c87b6b,stroke:#8a4434,color:#fff
+  classDef relay fill:#8aa67a,stroke:#4a6b3a,color:#fff
+```
+
+
 메시 네트워크 구조 (단순화):
 - 리더 2대가 *중계 드론 3대 모두*와 연결
 - 관측·열화상 드론은 *가장 가까운 중계 드론*과 연결
@@ -417,6 +456,16 @@ fetch $sid;
 ```
 
 답: `DRN-012` 1행 (예비 드론, 미할당 상태이므로 정상). 활성 11대는 모두 최소 1개 링크 보유 — *데이터 무결성* 확인.
+
+---
+
+## 연습문제
+
+**문제 1 (스케일).** 이 책은 12대를 다룬다. *24대로 확장*한다면 — 능력 매듭 수, 링크 수, 역할 매듭 수가 *각각 몇 개*로 늘어날 것 같은가? (단순 2배는 아닐 수도. *왜*인지 한 줄로)
+
+**문제 2 (시간 변화).** 임무 진행 중 DRN-005의 *위치*가 1초마다 바뀐다. 이걸 데이터에 박는 *세 가지 모델링 선택*은? 각각의 trade-off는?
+
+**문제 3 (품질 저하 시나리오).** `link_quality`가 *0.5 이하*로 떨어지는 자리를 어떻게 자동 감지하나? 6.7 Check 패턴 응용.
 
 ---
 

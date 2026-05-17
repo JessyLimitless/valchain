@@ -209,6 +209,34 @@ drone_loss(DRN-001) at 17:23:00, cause: communication_failure, severity: severe
 
 5분 28초. 한 드론이 손실되고 — 군집이 *복구되기까지*의 시간. 사람이 *손으로* 같은 일을 한다면 — 베테랑 분석가도 *15분 이상* 걸린다. 능력 트리에서 검색하고, 통신 표를 보고, 후보를 비교하고. 그 *시간 단축의 자리*가 — 이 책이 짠 시스템의 *진짜 가치*다.
 
+```mermaid
+%% caption: 시나리오 A — 5단계 사건 대응 시퀀스
+sequenceDiagram
+  participant A as 분석가
+  participant DB as TypeDB
+  participant F as 7장 함수
+  
+  Note over A,F: T+0초 — 사건 등록
+  A->>DB: drone_loss(DRN-001) insert
+  
+  Note over A,F: T+10초 — 영향 자동 식별
+  DB->>F: Q1: 어느 역할 공백?
+  DB->>F: Q2: 어느 링크 끊김?
+  DB->>F: Q3: 메시 도달 가능?
+  F-->>A: leader 공백, 4개 링크, 우회 살아있음
+  
+  Note over A,F: T+30초 — 대체 후보 도출
+  DB->>F: 세 함수 교집합 호출
+  F-->>A: DRN-002 추천 + 이유
+  
+  Note over A,F: T+1분 — 분석가 판단 (12초)
+  A->>A: 위치·배터리·심각도 확인
+  
+  Note over A,F: T+5분 — 재할당 적용
+  A->>DB: 재할당 승인
+  DB-->>A: 군집 재구성 완료
+```
+
 #### 시간축 요약표
 
 | 시점 | 단계 | 시스템 작업 | 인간 작업 |
@@ -307,6 +335,31 @@ match
   
   $cand has serial_id $sid;
 fetch $sid;
+```
+
+```mermaid
+%% caption: 한 사건의 영향이 자동으로 풀려나가는 그래프
+graph LR
+  E["drone_loss<br/>DRN-001"]:::event
+  E --> R["leader 자리<br/>공백"]:::impact
+  E --> L1["d01-d02 링크"]:::link
+  E --> L2["d01-d09 링크"]:::link
+  E --> L3["d01-d10 링크"]:::link
+  E --> L4["d01-d11 링크"]:::link
+  
+  R --> Q["7장 함수 합성<br/>(3중 교집합)"]:::function
+  Q --> C["DRN-002<br/>대체 후보"]:::solution
+  
+  L2 -.-> M["메시 우회 경로<br/>(reachable 함수)"]:::function
+  L3 -.-> M
+  L4 -.-> M
+  M --> OK["통신 보존 확인"]:::solution
+  
+  classDef event fill:#c87b6b,stroke:#8a4434,color:#fff
+  classDef impact fill:#d4af37,stroke:#8b6914,color:#2a2a2a
+  classDef link fill:#a8a4a0,stroke:#5a5853,color:#fff
+  classDef function fill:#7da3c5,stroke:#3d6b8d,color:#fff
+  classDef solution fill:#8aa67a,stroke:#4a6b3a,color:#fff
 ```
 
 **세 함수의 교집합**:
@@ -810,3 +863,13 @@ TypeDB의 함수는 *명시적 TMS가 아니다*. 그러나 — *backward chaini
 - Materialization 트레이드오프
 
 다음 장 — *9장 정리와 다음 발걸음*. 책 전체의 *네 가지 도구가 어떻게 회수되었는가*, 자매 책과의 비교, 그리고 *OWL·SHACL·Description Logic*으로의 다음 자리.
+
+---
+
+## 연습문제
+
+**문제 1 (시나리오 변형).** *DRN-002까지 동시 손실*된다면 — 8.2.4의 교집합 쿼리가 어떤 결과를 낼 것 같은가? 시스템이 *대안적 답*을 내려면 어떤 함수를 더 짜야 하나?
+
+**문제 2 (사건 우선순위).** 시나리오 A(리더 손실)와 시나리오 D(임무 우선순위 변경)가 *동시에* 발생한다면 — 시스템이 어느 것을 먼저 처리해야 하나? `severity` 속성을 어떻게 설계하면 자동 우선순위가 가능한가?
+
+**문제 3 (Truth Maintenance).** 분석가가 *재할당 승인을 취소*한다면 — 데이터 모델 위에서 어떤 *되돌리기 연산*이 필요한가? 8.2.5의 `assignment_end` 박힌 매듭은 어떻게 되돌리나?

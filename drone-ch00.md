@@ -180,8 +180,21 @@ fun all_suppliers_of($company: company) -> { company }:
 
 #### 4원소의 결합
 
-```
-PolyModel = 객체지향(상속) + 관계형(스키마 강제) + 그래프(N항 관계) + 함수형(쿼리)
+```mermaid
+%% caption: PolyModel — 네 패러다임이 한 시스템 안에서
+graph TB
+  subgraph TDB["TypeDB 3.0 — PolyModel"]
+    direction LR
+    OO["객체지향<br/>entity 상속<br/>(LSP)"]
+    RM["관계형<br/>스키마·제약 강제<br/>(@card @range)"]
+    GR["그래프<br/>일급 N항 관계<br/>(Davidson)"]
+    FN["함수형<br/>선언적·재귀 쿼리<br/>(Datalog)"]
+  end
+  D["복합 도메인<br/>(드론·반도체·의료·법무)"]
+  OO --> D
+  RM --> D
+  GR --> D
+  FN --> D
 ```
 
 이 네 가지가 *각각* 다른 패러다임의 강점이고 — *동시에* 한 시스템 안에 있는 게 TypeDB의 자리.

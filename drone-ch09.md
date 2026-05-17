@@ -395,4 +395,102 @@ pip install typedb-driver
 
 ---
 
+## 부록 D. TypeDB 초보자 함정 FAQ
+
+처음 TypeDB를 손에 잡은 사람이 *자주 막히는 자리*를 정리. 책의 예제를 따라 치다 어디서 에러가 나면 — 먼저 이 자리를 본다.
+
+### Q1. `transaction schema` vs `transaction write` vs `transaction read` — 언제 어느 것?
+
+세 가지 트랜잭션 모드의 자리가 다르다:
+
+- **`transaction schema {db}`** — 스키마(타입 정의) 변경. `define`·`undefine` 사용. 5장에서 사용.
+- **`transaction write {db}`** — 데이터 변경. `insert`·`delete`·`update` 사용. 6장과 8장에서 사용.
+- **`transaction read {db}`** — 읽기 전용. `match`·`fetch`·함수 호출. 7장에서 주로 사용.
+
+*막히는 자리*: `define`을 `transaction write` 안에서 실행하면 *권한 없음*. *먼저 schema 모드로 진입*해야 함.
+
+### Q2. "Role not defined for relation" 에러
+
+원인: `relation R, relates X`로 선언한 자리에 *X를 plays하는 entity가 없음*. 예:
+
+```typeql
+# 잘못된 자리
+define
+  relation assigned_to, relates assigned_drone;
+  # drone plays assigned_to:assigned_drone;  ← 이 줄이 빠짐!
+
+insert
+  (assigned_drone: $d) isa assigned_to;  # 에러
+```
+
+*해결*: 관계에서 자리(role)를 선언했으면 — *반드시 어느 entity가 그 자리를 plays*하는지도 선언.
+
+### Q3. 스키마 변경 후 기존 데이터는?
+
+- *비파괴 변경* (속성 추가, 새 entity 추가) → 기존 데이터 *유지*.
+- *호환 변경* (`@card` 완화, optional 변경) → 기존 데이터 *유지* (단 새 제약 위반 시 에러).
+- *파괴 변경* (entity 삭제, role 삭제, `@card` 강화) → 기존 데이터가 *조건에 부합해야* 변경 가능. 안 되면 *수동으로 데이터 마이그레이션* 필요.
+
+운영 환경에서는 — *파괴 변경 전에 반드시 백업*.
+
+### Q4. 같은 attribute을 여러 entity가 owns — 가능?
+
+가능하고, *권장됨*. 예: `serial_id`를 `drone`도 `ground_station`도 둘 다 `owns`.
+
+```typeql
+drone owns serial_id @card(1..1);
+ground_station owns serial_id @card(1..1);
+```
+
+이게 *값 공유*는 아니다. 같은 *attribute 타입*을 *서로 다른 entity*가 각자 따로 쓰는 것. 단 — *unique 제약*은 별도. 같은 `serial_id` 값을 *두 entity가 동시에 가질 수 있는가*는 *추가 제약*이 결정.
+
+### Q5. `@card(1..1)` vs `@card(0..1)` — 언제 차이가 나나
+
+- `@card(1..1)` — *반드시 정확히 1개*. 데이터 입력 시 빠지면 *에러*. 운영 식별자(serial_id 같은 자리)에 권장.
+- `@card(0..1)` — *0개 또는 1개*. NULL 허용. 옵션 속성(manufacturer 같은 자리)에 권장.
+
+*막히는 자리*: schema에 `@card(1..1)`로 선언했는데 데이터에 안 넣으면 — *insert 자체가 실패*. 초기 데이터 import 시 자주 만나는 자리.
+
+### Q6. 재귀 함수의 stack overflow
+
+`fun X(...) -> { ... }: match ... or match ...; let $x in X(...);`
+
+이 패턴은 *기저 케이스*가 정확해야 한다. 잘못된 자리:
+
+```typeql
+# 위험한 자리 — 사이클 그래프에서 무한 재귀
+fun all_reachable($d: drone) -> { drone }:
+  match (link_endpoint: $d, link_endpoint: $next) isa communicates_with;
+  return { $next };
+  or
+  match (link_endpoint: $d, link_endpoint: $mid) isa communicates_with;
+       let $next in all_reachable($mid);
+  return { $next };
+```
+
+A↔B↔A 같은 *사이클*이 있으면 — 무한 재귀. *방문 노드 추적*이 필요한 자리. TypeDB의 함수는 *Fixpoint 의미론*으로 자동 종료하긴 하지만 — 일반적으로 *명시적 종료 조건*을 두는 게 안전.
+
+### Q7. *하위 타입의 attribute 제거*가 가능한가?
+
+```typeql
+entity vehicle, owns model_name;
+entity drone sub vehicle;
+# drone에서 model_name을 빼고 싶다면?
+```
+
+*불가능*. Liskov 치환 원칙(LSP). 상위가 약속한 것을 하위가 어길 수 없음. 만약 model_name이 *drone에 부적합*하다면 — 분류 트리 자체를 재설계해야 한다 (상위에서 model_name 빼고, model_name이 필요한 자리만 별도 가지로).
+
+### Q8. 대용량 데이터 로딩 — 어떻게?
+
+12대 정도는 *한 트랜잭션*으로 가능. 그러나 *1만 대 이상*이면:
+
+1. **배치 분할** — 1000개씩 commit
+2. **Python/Java driver의 batch API** 사용 (`typedb-driver`)
+3. **인덱싱** — 자주 검색되는 attribute에 미리 인덱스 (TypeDB 3.0은 일부 attribute에 자동)
+4. **schema commit과 data commit 분리** — 스키마 먼저 안정시키고 데이터 import
+
+본격 운영 시 — 공식 문서의 *bulk loading* 절을 참고.
+
+---
+
 — 끝.
