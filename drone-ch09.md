@@ -225,4 +225,34 @@ OWL 추론기(HermiT, Pellet, ELK)는 *데이터 + 스키마*에서 *모든 도�
 
 그 자리가 잘 짜이기를.
 
+---
+
+## 부록 A. 설치 한눈에
+
+**Docker 기반 TypeDB 3.0 (권장)**
+```bash
+docker pull typedb/typedb:3.0.0
+docker run -d -p 1729:1729 --name typedb typedb/typedb:3.0.0
+docker exec -it typedb typedb console
+```
+
+**TypeDB Studio** (시각적 도구)
+- 공식 다운로드: <https://typedb.com/download>
+- 접속: `localhost:1729`, 사용자 `admin`, 비밀번호 `password`(기본값, 첫 로그인 시 변경)
+
+**Python SDK** (8장 자동화 자리)
+```bash
+pip install typedb-driver
+```
+
+## 부록 B. 책의 코드 저장소
+
+이 책의 모든 스키마·데이터·함수는 GitHub 저장소에서 받을 수 있다.
+
+- 저장소: <https://github.com/JessyLimitless/valchain>
+- `drone-ch01.md` ~ `drone-ch09.md` 안의 모든 TypeQL 블록이 *복붙 가능 코드*
+- 후속 개정에서 *실 환경 검증된 코드*로 단계적 교체
+
+---
+
 — 끝.

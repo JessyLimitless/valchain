@@ -182,18 +182,36 @@ insert
     has capability_grade 4;
   (capable_drone: $d03, capability_type: $cap_obstacle) isa has_capability,
     has capability_grade 3;
-  # ... d04, d05, d06 동일 패턴
+  (capable_drone: $d04, capability_type: $cap_night) isa has_capability,
+    has capability_grade 4;
+  (capable_drone: $d04, capability_type: $cap_obstacle) isa has_capability,
+    has capability_grade 3;
+  (capable_drone: $d05, capability_type: $cap_night) isa has_capability,
+    has capability_grade 4;
+  (capable_drone: $d05, capability_type: $cap_obstacle) isa has_capability,
+    has capability_grade 3;
+  (capable_drone: $d06, capability_type: $cap_night) isa has_capability,
+    has capability_grade 4;
+  (capable_drone: $d06, capability_type: $cap_obstacle) isa has_capability,
+    has capability_grade 3;
   
-  # 열화상 2대: thermal_imaging 5등급
+  # 열화상 2대: thermal_imaging 5등급 + obstacle_avoidance 4등급
   (capable_drone: $d07, capability_type: $cap_thermal) isa has_capability,
     has capability_grade 5;
+  (capable_drone: $d07, capability_type: $cap_obstacle) isa has_capability,
+    has capability_grade 4;
   (capable_drone: $d08, capability_type: $cap_thermal) isa has_capability,
     has capability_grade 5;
+  (capable_drone: $d08, capability_type: $cap_obstacle) isa has_capability,
+    has capability_grade 4;
   
-  # 통신 중계 3대: mesh_relay 5등급 + long_range_comm 4등급
+  # 통신 중계 3대: mesh_relay 5등급
   (capable_drone: $d09, capability_type: $cap_relay) isa has_capability,
     has capability_grade 5;
-  # ... d10, d11
+  (capable_drone: $d10, capability_type: $cap_relay) isa has_capability,
+    has capability_grade 5;
+  (capable_drone: $d11, capability_type: $cap_relay) isa has_capability,
+    has capability_grade 5;
   
   # 예비 1대: 다목적 (각 능력 3등급)
   (capable_drone: $d12, capability_type: $cap_night) isa has_capability,
