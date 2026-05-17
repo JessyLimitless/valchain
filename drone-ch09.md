@@ -105,10 +105,12 @@
 
 **OWL (Web Ontology Language)**. W3C의 표준. *Description Logic*에 기반. 표현력이 매우 높지만 — *결정 가능성(decidability)*과의 트레이드오프가 항상 작동.
 
+**쉬운 풀이**: OWL은 *Photoshop*과 비슷한 자리. *모든 것을 할 수 있는 도구*이지만 — 그래서 *학습 곡선이 가파르고 사용이 무거움*. TypeDB는 *Figma*에 가깝다. *대부분의 도메인을 빠르게 자연스럽게 다루지만* — 일부 극한의 경우는 표현 못함. OWL의 세 profile은 — *Photoshop의 기본 버전·웹 버전·일러스트레이션 특화 버전* 같은 분기.
+
 OWL 2의 세 가지 profile:
-- **OWL 2 EL** — Existential Language. 계산 효율적, 의료 온톨로지(SNOMED CT)에 사용
-- **OWL 2 QL** — Query Language. 관계형 DB 매핑에 친화적
-- **OWL 2 RL** — Rule Language. 규칙 기반 추론에 친화적
+- **OWL 2 EL** — Existential Language. 계산 효율적, 의료 온톨로지(SNOMED CT)에 사용 — *대용량 분류에 강함*
+- **OWL 2 QL** — Query Language. 관계형 DB 매핑에 친화적 — *기존 시스템 통합에 강함*
+- **OWL 2 RL** — Rule Language. 규칙 기반 추론에 친화적 — *추론 엔진 친화*
 
 TypeDB와의 비교:
 - OWL은 *추론 풍부*하지만 *학습 곡선 가파름*
