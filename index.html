@@ -57,12 +57,17 @@
 }
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 *::selection{background:var(--selection);color:var(--text)}
-html{scroll-behavior:smooth;scroll-padding-top:84px;-webkit-text-size-adjust:100%;text-size-adjust:100%}
+html{scroll-behavior:smooth;scroll-padding-top:128px;-webkit-text-size-adjust:100%;text-size-adjust:100%}
 body{margin:0;font-family:var(--font-serif);background:var(--bg);color:var(--text);font-size:var(--fs,17px);line-height:1.88;letter-spacing:-.005em;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;text-rendering:optimizeLegibility;font-feature-settings:'kern','liga','palt';transition:background .4s cubic-bezier(.4,0,.2,1),color .4s;overscroll-behavior-y:none}
 body::before{content:'';position:fixed;inset:0;pointer-events:none;background-image:radial-gradient(ellipse at 15% 10%,rgba(157,111,58,.025) 0%,transparent 55%),radial-gradient(ellipse at 85% 90%,rgba(157,111,58,.02) 0%,transparent 55%);z-index:-1;transition:opacity .4s}
 [data-theme="dark"] body::before{background-image:radial-gradient(ellipse at 15% 10%,rgba(212,164,122,.04) 0%,transparent 55%),radial-gradient(ellipse at 85% 90%,rgba(212,164,122,.025) 0%,transparent 55%)}
-#progress-bar{position:fixed;top:0;left:0;height:2px;background:linear-gradient(90deg,var(--accent) 0%,var(--accent-muted) 100%);width:0;z-index:100;transition:width .15s ease-out;box-shadow:0 0 8px var(--accent-soft)}
-header{position:fixed;top:0;left:0;right:0;height:60px;background:var(--header-bg);backdrop-filter:saturate(180%) blur(20px);-webkit-backdrop-filter:saturate(180%) blur(20px);border-bottom:1px solid var(--border-soft);display:flex;align-items:center;padding:0 max(24px,env(safe-area-inset-right)) 0 max(24px,env(safe-area-inset-left));z-index:50;gap:14px;font-family:var(--font-sans);transition:background .4s,border-color .4s}
+#progress-bar{position:fixed;top:84px;left:0;height:2px;background:linear-gradient(90deg,var(--accent) 0%,var(--accent-muted) 100%);width:0;z-index:100;transition:width .15s ease-out;box-shadow:0 0 8px var(--accent-soft)}
+.book-tabs{position:fixed;top:0;left:0;right:0;height:44px;background:var(--bg-elevated);border-bottom:1px solid var(--border-soft);display:flex;align-items:stretch;z-index:55;font-family:var(--font-sans);padding:0 max(20px,env(safe-area-inset-left)) 0 max(20px,env(safe-area-inset-right));transition:background .4s,border-color .4s}
+.book-tabs a{display:inline-flex;align-items:center;padding:0 18px;color:var(--text-muted);text-decoration:none;font-size:12.5px;letter-spacing:.01em;font-weight:500;border-bottom:2px solid transparent;transition:all .2s;white-space:nowrap}
+.book-tabs a:hover{color:var(--text);background:var(--bg-soft)}
+.book-tabs a.active{color:var(--accent);border-bottom-color:var(--accent);font-weight:600}
+.book-tabs .label{font-size:10.5px;letter-spacing:.18em;color:var(--text-soft);text-transform:uppercase;margin-right:auto;padding-left:6px;font-weight:600;align-self:center}
+header{position:fixed;top:44px;left:0;right:0;height:60px;background:var(--header-bg);backdrop-filter:saturate(180%) blur(20px);-webkit-backdrop-filter:saturate(180%) blur(20px);border-bottom:1px solid var(--border-soft);display:flex;align-items:center;padding:0 max(24px,env(safe-area-inset-right)) 0 max(24px,env(safe-area-inset-left));z-index:50;gap:14px;font-family:var(--font-sans);transition:background .4s,border-color .4s}
 header .brand{flex:1;font-size:13px;color:var(--text-muted);letter-spacing:.005em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0;display:flex;align-items:baseline;gap:10px}
 header .brand .brand-title{color:var(--text);font-weight:600;letter-spacing:-.005em;flex-shrink:0}
 header .brand .brand-sub{color:var(--text-soft);font-weight:400;font-size:12.5px;overflow:hidden;text-overflow:ellipsis}
@@ -73,9 +78,9 @@ header button svg{width:16px;height:16px;display:block}
 #nav-toggle{display:none}
 .controls{display:flex;gap:4px;align-items:center}
 .controls .vr{width:1px;height:18px;background:var(--border);margin:0 8px;opacity:.7}
-.backdrop{display:none;position:fixed;top:60px;left:0;right:0;bottom:0;background:var(--backdrop);z-index:35;backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);opacity:0;transition:opacity .25s}
+.backdrop{display:none;position:fixed;top:104px;left:0;right:0;bottom:0;background:var(--backdrop);z-index:35;backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);opacity:0;transition:opacity .25s}
 .backdrop.show{display:block;opacity:1}
-#sidebar{position:fixed;top:60px;left:0;width:320px;height:calc(100vh - 60px);height:calc(100dvh - 60px);background:var(--bg-elevated);border-right:1px solid var(--border-soft);overflow-y:auto;-webkit-overflow-scrolling:touch;padding:36px 16px calc(80px + env(safe-area-inset-bottom));font-family:var(--font-sans);z-index:40;transition:transform .35s cubic-bezier(.4,0,.2,1),background .4s,border-color .4s;overscroll-behavior:contain}
+#sidebar{position:fixed;top:104px;left:0;width:320px;height:calc(100vh - 104px);height:calc(100dvh - 104px);background:var(--bg-elevated);border-right:1px solid var(--border-soft);overflow-y:auto;-webkit-overflow-scrolling:touch;padding:36px 16px calc(80px + env(safe-area-inset-bottom));font-family:var(--font-sans);z-index:40;transition:transform .35s cubic-bezier(.4,0,.2,1),background .4s,border-color .4s;overscroll-behavior:contain}
 #sidebar::-webkit-scrollbar{width:4px}
 #sidebar::-webkit-scrollbar-track{background:transparent}
 #sidebar::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
@@ -94,7 +99,7 @@ header button svg{width:16px;height:16px;display:block}
 .toc li > a.active::before{content:'';position:absolute;left:5px;top:50%;transform:translateY(-50%);width:3px;height:14px;background:var(--accent);border-radius:2px}
 .toc .num{color:var(--text-soft);font-variant-numeric:tabular-nums;font-size:11px;text-align:right;padding-top:2px;font-feature-settings:'tnum'}
 .toc a.active .num{color:var(--accent)}
-main{margin-left:320px;padding:104px 0 80px;transition:margin .35s}
+main{margin-left:320px;padding:140px 0 80px;transition:margin .35s}
 .cover{max-width:680px;margin:48px auto 120px;padding:48px 32px;text-align:center;min-height:78vh;display:flex;flex-direction:column;justify-content:center;position:relative}
 .cover .eyebrow{font-family:var(--font-sans);font-size:11px;letter-spacing:.4em;color:var(--accent);text-transform:uppercase;margin-bottom:64px;font-weight:600;display:flex;align-items:center;justify-content:center;gap:18px;padding-left:.4em}
 .cover .eyebrow::before,.cover .eyebrow::after{content:'';height:1px;width:32px;background:var(--accent);opacity:.45}
@@ -115,8 +120,8 @@ main{margin-left:320px;padding:104px 0 80px;transition:margin .35s}
 .part-intro::before{content:'';position:absolute;top:0;left:50%;transform:translateX(-50%);width:60px;height:1px;background:var(--border)}
 .part-intro .part-num{font-family:var(--font-sans);font-size:10px;color:var(--accent);letter-spacing:.4em;text-transform:uppercase;margin-bottom:22px;font-weight:700}
 .part-intro .part-title{font-family:var(--font-serif);font-size:clamp(24px,3.4vw,34px);font-weight:700;line-height:1.32;margin:0;color:var(--text);letter-spacing:-.022em}
-.chapter{max-width:680px;margin:0 auto;padding:80px 32px 40px;scroll-margin-top:80px;font-feature-settings:'kern','liga','palt'}
-.chapter:first-of-type{padding-top:60px}
+.chapter{max-width:680px;margin:0 auto;padding:72px 32px 36px;scroll-margin-top:128px;font-feature-settings:'kern','liga','palt'}
+.chapter:first-of-type{padding-top:104px}
 .chapter-eyebrow{font-family:var(--font-sans);font-size:10.5px;letter-spacing:.32em;color:var(--accent);text-transform:uppercase;margin:0 0 18px;font-weight:700}
 .chapter h1{font-family:var(--font-serif);font-size:clamp(27px,3.8vw,36px);font-weight:700;line-height:1.28;letter-spacing:-.022em;margin:0 0 0;color:var(--text);font-feature-settings:'kern','palt'}
 .chapter h1 + p,.chapter h1 + hr + p{margin-top:48px}
@@ -196,6 +201,16 @@ main{margin-left:320px;padding:104px 0 80px;transition:margin .35s}
 }
 @media(max-width:640px){
   body{font-size:var(--fs,16.5px);line-height:1.85}
+  .book-tabs{height:40px;padding:0 14px;overflow-x:auto;-webkit-overflow-scrolling:touch}
+  .book-tabs::-webkit-scrollbar{display:none}
+  .book-tabs a{padding:0 12px;font-size:12px}
+  .book-tabs .label{font-size:10px;letter-spacing:.16em;padding-left:0;margin-right:8px}
+  header{top:40px}
+  #progress-bar{top:80px}
+  .backdrop{top:100px}
+  #sidebar{top:100px;height:calc(100vh - 100px);height:calc(100dvh - 100px)}
+  main{padding:140px 0 60px}
+  .chapter{scroll-margin-top:120px}
   .chapter{padding:56px 20px 24px;max-width:100%}
   .cover{padding:28px 20px;margin:20px auto 72px;min-height:72vh;min-height:72dvh}
   .cover .eyebrow{margin-bottom:40px;gap:12px;font-size:10.5px;letter-spacing:.32em}
@@ -226,7 +241,7 @@ main{margin-left:320px;padding:104px 0 80px;transition:margin .35s}
   #nav-toggle svg{width:18px;height:18px}
   #back-to-top{bottom:max(18px,env(safe-area-inset-bottom));right:max(18px,env(safe-area-inset-right));width:44px;height:44px}
   #back-to-top svg{width:15px;height:15px}
-  .backdrop{top:60px}
+  .backdrop{top:104px}
   #sidebar{width:min(86vw,300px);padding-top:24px}
 }
 @media(max-width:380px){
@@ -239,7 +254,7 @@ main{margin-left:320px;padding:104px 0 80px;transition:margin .35s}
   header button{min-width:38px;height:38px;padding:0 8px}
 }
 @media print{
-  header,#sidebar,#back-to-top,#progress-bar,.chapter-nav,.backdrop{display:none!important}
+  .book-tabs,header,#sidebar,#back-to-top,#progress-bar,.chapter-nav,.backdrop{display:none!important}
   main{margin-left:0;padding:0}
   .chapter{page-break-after:always;max-width:none;padding:24px}
   body::before{display:none}
@@ -251,6 +266,11 @@ main{margin-left:320px;padding:104px 0 80px;transition:margin .35s}
 </style>
 </head>
 <body data-theme="light">
+<nav class="book-tabs" aria-label="책 선택">
+  <span class="label">전자책</span>
+  <a href="index.html" class="active">광전자에서 시작된 한 권의 책</a>
+  <a href="technical.html">TypeDB로 짓는 드론 군집비행 온톨로지</a>
+</nav>
 <div id="progress-bar"></div>
 <div id="backdrop" class="backdrop"></div>
 <header>
