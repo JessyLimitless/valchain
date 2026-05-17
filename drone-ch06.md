@@ -173,7 +173,7 @@ insert
   $cap_lead isa formation_lead, has capability_name "formation_lead";
   $cap_obstacle isa obstacle_avoidance, has capability_name "obstacle_avoidance";
   
-  # === 능력 매핑 (요지만 — 전체는 약 30개 매듭) ===
+  # === 능력 매핑 (전체 21개 매듭) ===
   
   # 리더 후보 2대: formation_lead 5등급 + obstacle_avoidance 4등급
   (capable_drone: $d01, capability_type: $cap_lead) isa has_capability,
@@ -230,7 +230,7 @@ insert
 commit;
 ```
 
-총 ~30개의 `has_capability` 매듭. 군집의 *능력 매트릭스*가 데이터에 박힘.
+총 21개 `has_capability` 매듭. 군집의 *능력 매트릭스*가 데이터에 박힘.
 
 ---
 
@@ -301,6 +301,10 @@ commit;
 
 ```typeql
 insert
+  # === 리더 페어 (1개) — 리더-팔로워 직접 통신 ===
+  (link_endpoint: $d01, link_endpoint: $d02) isa communicates_with,
+    has link_quality 0.97, has link_established_at 2026-04-01T16:00:00;
+  
   # === 리더 ↔ 중계 (6개) ===
   (link_endpoint: $d01, link_endpoint: $d09) isa communicates_with,
     has link_quality 0.95, has link_established_at 2026-04-01T16:00:00;
@@ -315,7 +319,7 @@ insert
   (link_endpoint: $d02, link_endpoint: $d11) isa communicates_with,
     has link_quality 0.85, has link_established_at 2026-04-01T16:00:00;
   
-  # === 관측 ↔ 중계 (8개) ===
+  # === 관측 ↔ 중계 (4개) ===
   (link_endpoint: $d03, link_endpoint: $d09) isa communicates_with,
     has link_quality 0.85, has link_established_at 2026-04-01T16:00:00;
   (link_endpoint: $d04, link_endpoint: $d09) isa communicates_with,
@@ -342,7 +346,7 @@ insert
 commit;
 ```
 
-총 ~19개 링크. 메시 그래프의 *백본 + 가지* 구조.
+총 16개 링크 (리더 페어 1 + 리더↔중계 6 + 관측↔중계 4 + 열화상↔중계 2 + 백본 3). 메시 그래프의 *백본 + 가지* 구조. *예비 드론 DRN-012는 미할당 상태 — 링크 없음*.
 
 ---
 
@@ -368,7 +372,7 @@ match
 fetch $sid; $cname; $g;
 ```
 
-답: ~30개 행. 각 드론의 능력 매트릭스.
+답: 21개 행. 각 드론의 능력 매트릭스.
 
 ### Check 3 — 임무에 배치된 드론
 
@@ -395,7 +399,7 @@ match
 fetch $aid; $bid; $q;
 ```
 
-답: ~19개 행.
+답: 16개 행.
 
 ### Check 5 — 고립된 드론 (링크 0개) 식별
 
@@ -406,7 +410,7 @@ match
 fetch $sid;
 ```
 
-답: 빈 결과 — 모든 드론이 최소 1개의 링크 보유. *데이터 무결성* 확인.
+답: `DRN-012` 1행 (예비 드론, 미할당 상태이므로 정상). 활성 11대는 모두 최소 1개 링크 보유 — *데이터 무결성* 확인.
 
 ---
 
