@@ -27,6 +27,12 @@
   --accent:#3d5a80;
   --accent-muted:#7895b2;
   --accent-soft:rgba(61,90,128,.08);
+  --diagram-bg-1:#fbf9f4;
+  --diagram-bg-2:#f5f2ea;
+  --diagram-border:#e8e3d6;
+  --diagram-border-strong:#c8c2b2;
+  --diagram-shadow:rgba(80,65,40,.05);
+  --diagram-shadow-deep:rgba(80,65,40,.04);
   --code-bg:#e7eaef;
   --quote-bg:rgba(61,90,128,.05);
   --selection:rgba(61,90,128,.22);
@@ -48,6 +54,12 @@
   --accent:#7895b2;
   --accent-muted:#5a7a99;
   --accent-soft:rgba(120,149,178,.12);
+  --diagram-bg-1:#1a1f29;
+  --diagram-bg-2:#141821;
+  --diagram-border:#252d39;
+  --diagram-border-strong:#3a4250;
+  --diagram-shadow:rgba(0,0,0,.3);
+  --diagram-shadow-deep:rgba(0,0,0,.4);
   --code-bg:#141a22;
   --quote-bg:rgba(120,149,178,.06);
   --selection:rgba(120,149,178,.26);
@@ -159,12 +171,82 @@ main{margin-left:320px;padding:140px 0 80px;transition:margin .35s}
 .chapter pre::-webkit-scrollbar-thumb:hover{background:var(--text-soft)}
 .chapter table{width:100%;border-collapse:collapse;margin:28px 0;font-size:.93em;font-family:var(--font-sans);border:1px solid var(--border-soft);border-radius:10px;overflow:hidden}
 @media(max-width:720px){.chapter table{display:block;overflow-x:auto;white-space:nowrap;border-radius:8px}}
-.mermaid-wrap{margin:36px 0;background:var(--bg-elevated);border:1px solid var(--border-soft);border-radius:12px;padding:28px 20px;overflow-x:auto;-webkit-overflow-scrolling:touch;transition:background .4s,border-color .4s}
-.mermaid-wrap .caption{font-family:var(--font-sans);font-size:11px;color:var(--text-soft);letter-spacing:.16em;text-transform:uppercase;text-align:center;margin-bottom:18px;font-weight:600}
-.mermaid{text-align:center;font-family:var(--font-sans)!important}
-.mermaid svg{max-width:100%;height:auto}
-[data-theme="dark"] .mermaid .node rect,[data-theme="dark"] .mermaid .node polygon,[data-theme="dark"] .mermaid .node circle{filter:brightness(.95)}
-@media(max-width:640px){.mermaid-wrap{padding:20px 12px;margin:28px -4px}.mermaid-wrap .caption{font-size:10px;letter-spacing:.12em}}
+/* ──────────────── 도식(Mermaid) — Claude 디자인 미학 ──────────────── */
+.mermaid-wrap{
+  position:relative;
+  margin:56px -8px;
+  background:linear-gradient(180deg,var(--diagram-bg-1) 0%,var(--diagram-bg-2) 100%);
+  border:1px solid var(--diagram-border);
+  border-radius:18px;
+  padding:48px 40px 40px;
+  overflow-x:auto;
+  -webkit-overflow-scrolling:touch;
+  box-shadow:
+    0 1px 0 rgba(255,255,255,.6) inset,
+    0 1px 3px var(--diagram-shadow),
+    0 8px 24px var(--diagram-shadow-deep);
+  transition:background .4s,border-color .4s,box-shadow .4s;
+}
+.mermaid-wrap::before{
+  content:'';
+  position:absolute;
+  top:-1px;left:50%;
+  transform:translateX(-50%);
+  width:48px;height:3px;
+  background:linear-gradient(90deg,transparent 0%,var(--accent) 50%,transparent 100%);
+  opacity:.5;
+  border-radius:0 0 3px 3px;
+}
+.mermaid-wrap .caption{
+  font-family:var(--font-sans);
+  font-size:10.5px;
+  color:var(--text-soft);
+  letter-spacing:.28em;
+  text-transform:uppercase;
+  text-align:center;
+  margin:0 0 32px;
+  font-weight:600;
+  position:relative;
+  padding-bottom:18px;
+}
+.mermaid-wrap .caption::after{
+  content:'';
+  position:absolute;
+  bottom:0;left:50%;
+  transform:translateX(-50%);
+  width:32px;height:1px;
+  background:var(--diagram-border-strong);
+}
+.mermaid-wrap .caption .caption-num{color:var(--accent);font-weight:700;letter-spacing:.32em}
+.mermaid-wrap .caption .caption-sep{color:var(--diagram-border-strong);margin:0 8px;font-weight:400}
+.mermaid-wrap .caption .caption-text{color:var(--text-soft);font-weight:500}
+.mermaid{
+  text-align:center;
+  font-family:'Inter','Pretendard Variable',sans-serif !important;
+}
+.mermaid svg{
+  max-width:100%;
+  height:auto;
+  filter:drop-shadow(0 2px 4px var(--diagram-shadow));
+}
+.mermaid .node rect,.mermaid .node polygon,.mermaid .node circle,.mermaid .node path{
+  filter:drop-shadow(0 1px 2px rgba(0,0,0,.06));
+  transition:filter .25s;
+}
+.mermaid .node:hover rect,.mermaid .node:hover polygon,.mermaid .node:hover circle{
+  filter:drop-shadow(0 2px 6px rgba(0,0,0,.12));
+}
+.mermaid .edgePath .path{stroke-linecap:round;stroke-linejoin:round}
+.mermaid .label{font-family:'Inter','Pretendard Variable',sans-serif !important;font-weight:500}
+.mermaid .cluster rect{rx:14;ry:14;filter:drop-shadow(0 1px 2px rgba(0,0,0,.04))}
+.mermaid .actor{rx:8;ry:8}
+[data-theme="dark"] .mermaid .node rect,[data-theme="dark"] .mermaid .node polygon,[data-theme="dark"] .mermaid .node circle{filter:drop-shadow(0 1px 2px rgba(0,0,0,.3))}
+[data-theme="dark"] .mermaid svg{filter:drop-shadow(0 2px 8px rgba(0,0,0,.4))}
+@media(max-width:640px){
+  .mermaid-wrap{padding:32px 16px 24px;margin:36px -4px;border-radius:14px}
+  .mermaid-wrap .caption{font-size:9.5px;letter-spacing:.22em;margin-bottom:22px;padding-bottom:14px}
+  .mermaid-wrap::before{width:36px}
+}
 .chapter table th,.chapter table td{padding:12px 16px;text-align:left;border-bottom:1px solid var(--border-soft)}
 .chapter table tr:last-child td{border-bottom:none}
 .chapter table th{font-weight:600;background:var(--bg-soft);color:var(--text);font-size:11px;letter-spacing:.08em;text-transform:uppercase}
@@ -5816,7 +5898,16 @@ commit;
 
 ## 8.3 시나리오 B — 두 드론 동시 손실
 
-더 어려운 상황. *DRN-001(leader) + DRN-009(중계)*가 동시 손실.
+*장면*. 같은 임무, 17시 23분. 정확히 같은 순간 — DRN-001(리더)과 DRN-009(중계)의 신호가 *동시에* 끊긴다. *동시*. 분석가의 화면에 두 줄이 동시에 떴다는 것은 — *우연이 아니다*. 산악 지역의 *강풍에 의한 충돌*이거나 *적대적 jamming*이거나, 둘 중 하나.
+
+시나리오 A보다 무거운 자리다. 시나리오 A에서는 *후보 1대*가 있었다. 여기서는 — *후보 1대 + 중계 1대 손실*이다. 메시 네트워크가 *둘로 갈라질 위험*이 처음으로 등장한다.
+
+분석가가 이 순간 마음에 들고 있는 질문 세 개:
+1. *임무를 계속할 수 있는가* — 능력 합산이 충족되는가
+2. *메시 네트워크가 분할되었는가* — 군집이 *두 부분*으로 갈라졌는가
+3. *추가 손실이 일어나면* — 그래도 *복구 가능한가*
+
+세 질문 모두 — *시스템이 도울 수 있는 자리*다.
 
 ### 8.3.1 사건 매듭 입력
 
@@ -5919,11 +6010,59 @@ fetch $r;
 
 **결론**: 임무 *계속 가능*. 단 — *통신 견고성이 줄어듦*. 추가 손실 시 *임무 중단 위험*. 분석가는 *추가 백업*을 검토하거나 *임무 우선순위 하향*을 결정.
 
+```mermaid
+%% caption: 시나리오 B — 이중 손실의 영향 분기
+graph TD
+  E1["drone_loss<br/>DRN-001"]:::event
+  E2["drone_loss<br/>DRN-009"]:::event
+  
+  E1 --> R["leader 공백"]:::impact
+  E1 --> CL["4개 링크 손실"]:::impact
+  E2 --> RM["mesh_relay 1/3 손실"]:::impact
+  E2 --> CL2["8개 링크 손실"]:::impact
+  
+  R --> Q1["leader_candidates<br/>(DRN-002 1대만)"]:::function
+  RM --> Q2["mesh 잔존 분석<br/>(d10, d11 살아있음)"]:::function
+  
+  Q1 --> D{"분석가 판단"}:::decision
+  Q2 --> D
+  D -->|계속| OK["임무 강행 + 견고성 감소"]:::solution
+  D -->|중단| STOP["임무 중단 + 회수"]:::warning
+  
+  classDef event fill:#c87b6b,stroke:#8a4434,color:#fff
+  classDef impact fill:#d4af37,stroke:#8b6914,color:#2a2a2a
+  classDef function fill:#7da3c5,stroke:#3d6b8d,color:#fff
+  classDef decision fill:#9c8ac8,stroke:#5a4480,color:#fff
+  classDef solution fill:#8aa67a,stroke:#4a6b3a,color:#fff
+  classDef warning fill:#c87b6b,stroke:#8a4434,color:#fff
+```
+
+### 8.3.4 ◇ 설계 결정 — 연쇄 손실의 자리
+
+*동시 손실*이 *단일 손실 두 번*과 다른 자리:
+
+**다른 점 1 — 사건 간 상호작용**
+단일 손실에서는 *한 사건의 영향*만 도출. 동시 손실에서는 *두 사건의 영향이 서로를 강화*. DRN-001 손실로 *임무 명령 채널*이 끊겼는데, DRN-009 손실로 *우회 중계 1대 감소*. 두 영향이 *곱셈처럼 작동*한다.
+
+**다른 점 2 — 후보 풀의 축소**
+시나리오 A에서는 *후보 1대*가 있었다. 시나리오 B에서도 *리더 후보는 여전히 DRN-002 1대*. 그러나 — *DRN-002까지 손실되는 시점*을 분석가가 *반드시 의식*해야 함. 즉 *시나리오 A의 답이 시나리오 B에서도 충분한가*가 별도 검토.
+
+**다른 점 3 — 메시 네트워크 분할 위험**
+DRN-009 손실 후 — 만약 *DRN-010이나 DRN-011 중 하나가 추가 손실*되면 — 군집이 *완전히 둘로 갈라짐*. 분석가는 *분할 임계점*을 알고 있어야 한다.
+
+이 세 가지가 — *N항 관계*와 *재귀 함수*가 *동시에 작동해야* 답을 도출할 수 있는 자리다. 단순 그래프 DB로는 *동시 사건의 상호작용*을 매번 수동으로 풀어야 한다.
+
 ---
 
 ## 8.4 시나리오 C — 통신 폭주
 
-기상 변화 또는 적대적 jamming으로 *여러 링크의 품질이 동시 저하*.
+*장면*. 17시 35분. 산악 지역 상공에서 *예기치 않은 무선 간섭*이 시작된다. 군용 항공기의 통과로 추정되는 *고출력 전자 방출*. 4개 링크의 *link_quality*가 동시에 *0.85에서 0.25 아래*로 떨어진다. 드론은 손실되지 않았다 — *드론은 모두 살아 있다*. 그러나 *네트워크의 신뢰성*이 *임무 수행 임계점 아래*로 떨어졌다.
+
+이것이 시나리오 A·B와 *근본적으로 다른 모양*이다. A·B에서는 *드론 객체*가 사라졌다. 여기서는 *링크 객체*가 영향받는다. 그리고 — *영향이 일시적*이다 (간섭원이 지나가면 회복). *공포 시간*은 15분으로 추정.
+
+분석가의 화면에 뜨는 한 줄: *"Mass interference detected, 4 links degraded, est. duration 15min"*. 시간이 *촉박*하다 — 임무 중간이라 *15분 동안의 운용 모드*를 *즉시 결정*해야 한다.
+
+이 시나리오가 — *링크를 일급 시민으로 취급한 5장의 설계*가 *진짜로 빛을 발하는 자리*다. 사건이 link 객체에 *plays*로 묶인다.
 
 ### 8.4.1 사건 매듭 입력
 
@@ -5994,11 +6133,87 @@ fetch $sid;
 
 여기서 *시스템이 도울 수 있는 것*: *우선순위별 도달 가능 경로* 분석. 시스템이 답하지 않는 자리: *어느 우선순위가 임무에 결정적*인지의 판단 — 분석가의 자리.
 
+### 8.4.5 15분 후 — 회복 처리
+
+간섭원 통과. 18시 03분. 분석가는 *영향 사건의 종료*를 시스템에 등록한다:
+
+```typeql
+match
+  $event isa communication_disruption,
+    has disruption_start 2026-04-01T17:35:00;
+  $event links (affected_link_set: $link);
+  $link has link_quality $degraded;
+
+insert
+  $link has link_quality 0.85;  # 회복된 품질
+```
+
+*간섭 사건 자체는 데이터에 보존*. 추후 *같은 자리에서 또 일어났을 때*의 분석에 사용. 데이터의 *시간축*이 사건의 *발생-회복*을 둘 다 박는다.
+
+```mermaid
+%% caption: 시나리오 C — 링크 객체에 사건이 묶이는 모양
+graph LR
+  E["communication_disruption<br/>17:35 ~ 18:03"]:::event
+  E -.plays.-> L1["link: d01-d09"]:::link
+  E -.plays.-> L2["link: d01-d10"]:::link
+  E -.plays.-> L3["link: d02-d09"]:::link
+  E -.plays.-> L4["link: d02-d10"]:::link
+  
+  L1 --> Q["link_quality<br/>0.95 → 0.25"]:::degrade
+  L2 --> Q
+  L3 --> Q
+  L4 --> Q
+  
+  Q --> A1["reachable_with_quality<br/>(임계 0.7 함수)"]:::function
+  A1 --> P["분석가: 우선순위 결정"]:::decision
+  P --> O1["명령 채널 보호"]:::solution
+  P --> O2["센서 전송 빈도 감소"]:::solution
+  
+  classDef event fill:#c87b6b,stroke:#8a4434,color:#fff
+  classDef link fill:#a8a4a0,stroke:#5a5853,color:#fff
+  classDef degrade fill:#d4af37,stroke:#8b6914,color:#2a2a2a
+  classDef function fill:#7da3c5,stroke:#3d6b8d,color:#fff
+  classDef decision fill:#9c8ac8,stroke:#5a4480,color:#fff
+  classDef solution fill:#8aa67a,stroke:#4a6b3a,color:#fff
+```
+
+### 8.4.6 ◇ 설계 결정 — 왜 communicates_with가 plays를 할 수 있는가
+
+이 시나리오가 — *5장의 *깊은 설계*를 한 번 더 짚는 자리다. 다시 보자:
+
+```typeql
+relation communication_disruption,
+  relates affected_link_set @card(1..);
+
+communicates_with plays communication_disruption:affected_link_set;
+```
+
+이 한 줄. *관계가 다른 관계의 자리에 들어간다*. RDF에서는 — *각 link를 reification으로 노드화*하고, 다시 *그 노드를 disruption 노드와 연결*하는 *이중 우회*가 필요한 자리. TypeDB에서는 *한 줄의 plays 선언*.
+
+**왜 이 모양이 중요한가**:
+- *링크 자체가 영향의 단위*인 도메인에서 — 이 모양 없이는 *링크 사건*을 *데이터에 깨끗이 적을 수 없다*
+- *링크 사건의 묶음*을 *하나의 매듭*으로 다루기 — 즉 *4개 링크가 같은 원인으로 동시 영향*이라는 *사실의 단위*를 보존
+- *시간축의 박힘* — disruption_start·expected_duration이 *사건 자체*에 박힘. 각 링크마다 따로 적지 않음.
+
+*Davidson이 1967년에 본 통찰*이 — *링크의 사건*에까지 자연스럽게 적용되는 자리다. 사건은 *그 자체로 존재자*이며, 사건의 *다른 사건과의 관계*도 일급으로 표현 가능.
+
+이 시나리오 없이는 — *5장의 깊은 설계*가 *과잉 설계처럼* 보일 수 있다. 시나리오 C가 — *그 설계의 필요성*을 *증명*한다.
+
 ---
 
 ## 8.5 시나리오 D — 임무 우선순위 변경
 
-군집이 *현재 임무*를 수행 중인데 — *긴급 임무*가 도착. 자원을 어떻게 재할당?
+*장면*. 17시 50분. 현재 임무가 *60% 진행* 상태에서 — 갑자기 관제 센터에 *두 번째 조난 신고*가 들어온다. *DRN-001이 막 재할당된 새 리더 체제*가 *처음으로 안정화된 직후*. 새 신고의 위치는 같은 산악 지역의 *5km 떨어진 자리*. 부상자 중 한 명이 *심각한 외상*을 호소.
+
+이번 사건은 — 시나리오 A·B·C와 *완전히 다른 자리*다. 드론도, 링크도 손실되지 않았다. 모든 시스템이 *정상 작동*. 그런데 — *결정의 무게가 가장 크다*. *어느 임무에 더 많은 자원을 보낼 것인가*는 — *기계가 답할 수 없는 자리*다. 
+
+분석가의 화면에 두 임무가 *나란히* 표시된다:
+- *임무 1* (MSN-2026-04-01-001) — 산악 수색, 2명 조난자, 60% 진행
+- *임무 2* (MSN-2026-04-01-002) — 신규, 1명 심각한 외상, 0% 진행, 우선순위 *Critical*
+
+12대의 드론(이중 1대 손실 후 11대). 두 임무가 모두 *야간 광학*과 *열화상*과 *통신 메시*를 요구. 자원은 *유한*하다.
+
+이 시나리오에서 — *시스템이 도울 수 있는 자리*가 정확히 무엇이고, *분석가만이 할 수 있는 자리*가 무엇인가가 *가장 또렷이 갈리는 자리*다.
 
 ### 8.5.1 사건 매듭 입력
 
@@ -6085,6 +6300,67 @@ commit;
 ```
 
 기존 임무의 *부분 자원 회수* + 새 임무로 *전환*. 데이터의 *시간축*이 모든 변경을 보존.
+
+### 8.5.4 세 가지 분할 전략 — 분석가의 결정 트리
+
+같은 사건 앞에서, *서로 다른 분석가가 다른 결정*을 내릴 수 있다. 셋 모두 *합리적*이다:
+
+**전략 A — 부분 분할** (선택됨)
+- 기존 임무 6대, 새 임무 5대, 예비 1대
+- *두 임무 동시 진행*. 각 임무의 능력은 *60~70% 수준*
+- 새 임무의 부상자가 *심각한데 신속함이 가능*
+
+**전략 B — 완전 전환**
+- 기존 임무를 *일시 중단* (11대 모두 새 임무로)
+- 새 임무 완료 후 *기존 임무 재개*
+- *새 임무의 사망 위험이 임박*한 경우의 선택
+
+**전략 C — 기존 유지 + 추가 자원 요청**
+- *외부 군집*(다른 관제 센터의 드론) 호출
+- 기존 임무 11대 유지, 새 임무는 외부 자원으로
+- *조직간 협조 가능*한 경우의 선택
+
+각 전략의 *데이터 모델 표현*이 모두 다르다:
+
+| 전략 | 데이터 변화 | 사건 매듭 |
+|---|---|---|
+| A 부분 분할 | 5개 assigned_to에 end 박고, 5개 new insert | mission_priority_change 1개 |
+| B 완전 전환 | 11개 assigned_to에 end, 11개 new insert | mission_priority_change + suspension 별도 |
+| C 외부 자원 | 외부 군집의 assigned_to insert | 인터-시스템 메시지 (책 범위 밖) |
+
+```mermaid
+%% caption: 시나리오 D — 세 가지 분할 전략의 결정 트리
+graph TD
+  E["mission_priority_change<br/>새 임무 도착 17:50"]:::event
+  E --> A["분석가의 결정<br/>(시스템이 답할 수 없음)"]:::decision
+  
+  A -->|부상자 신속 필요<br/>외부 자원 가능| C["전략 C<br/>외부 군집 호출"]:::strat
+  A -->|동시 진행 가능| SA["전략 A<br/>부분 분할 6+5"]:::strat
+  A -->|새 임무 사망 위험| SB["전략 B<br/>완전 전환"]:::strat
+  
+  C --> DC["인터-시스템 메시지"]:::action
+  SA --> DA["5+5 assigned_to 갱신"]:::action
+  SB --> DB["11 assigned_to 갱신 + suspension"]:::action
+  
+  classDef event fill:#c87b6b,stroke:#8a4434,color:#fff
+  classDef decision fill:#9c8ac8,stroke:#5a4480,color:#fff
+  classDef strat fill:#d4af37,stroke:#8b6914,color:#2a2a2a
+  classDef action fill:#8aa67a,stroke:#4a6b3a,color:#fff
+```
+
+### 8.5.5 ◇ 설계 결정 — 사건이 아닌 *결정*의 자리
+
+시나리오 A·B·C는 *사건*이었다. *외부에서 시스템에 가해진* 무엇. 시나리오 D는 *결정*이다. *시스템 안의 운영자가 내리는* 무엇.
+
+그런데 — *데이터 모델은 같은 모양*이다. *mission_priority_change*도 N항 관계로 표현. *시점*이 박힌다. *원인*과 *결과 임무*가 묶인다.
+
+**이게 의미하는 것**: 온톨로지의 *사건* 개념이 *물리적 사건*에만 적용되지 않는다. *인지적·운영적 결정*도 *사건*으로 다룬다. 의사가 *환자를 처방한다*는 결정, 법관이 *판결한다*는 결정, 분석가가 *임무 분할한다*는 결정 — 모두 *데이터에 박힌 사건*.
+
+**왜 이게 중요한가**: 이렇게 *결정을 데이터화*하면 — 나중에 *왜 그렇게 결정했는지의 회고*가 가능해진다. *유사한 자리에서 과거에 어떤 결정이 내려졌는지*가 쿼리 가능. *의사결정 지원 시스템*의 기초.
+
+이 책의 단순화에서는 *change_time + new_priority + reason*만 박았다. 실전에서는 — *어느 분석가*, *어느 권한*, *어느 외부 변수*까지 추가 매듭. 그러면 *결정의 책임 추적*까지 데이터에 박힌다.
+
+이것이 — *시나리오 D를 다루는 진짜 이유*다. 단순한 *재할당 예제*가 아니다. *의사결정의 온톨로지화*라는 *훨씬 큰 자리*의 시작이다.
 
 ---
 
@@ -6820,6 +7096,7 @@ document.querySelectorAll('script[type="text/markdown"]').forEach(s=>{
 
 // Mermaid 도식 처리: pre code.language-mermaid → .mermaid-wrap > .mermaid
 function processMermaidBlocks(){
+  let figIdx=0;
   document.querySelectorAll('pre code.language-mermaid').forEach(code=>{
     const pre=code.parentElement;
     const wrap=document.createElement('div');
@@ -6827,9 +7104,19 @@ function processMermaidBlocks(){
     const firstLine=code.textContent.split('\n')[0];
     const captionMatch=firstLine.match(/^%%\s*caption:\s*(.+)$/);
     if(captionMatch){
+      figIdx++;
       const cap=document.createElement('div');
       cap.className='caption';
-      cap.textContent=captionMatch[1].trim();
+      const num=document.createElement('span');
+      num.className='caption-num';
+      num.textContent=`도식 ${figIdx}`;
+      const sep=document.createElement('span');
+      sep.className='caption-sep';
+      sep.textContent=' · ';
+      const text=document.createElement('span');
+      text.className='caption-text';
+      text.textContent=captionMatch[1].trim();
+      cap.appendChild(num);cap.appendChild(sep);cap.appendChild(text);
       wrap.appendChild(cap);
     }
     const div=document.createElement('div');
@@ -6850,21 +7137,37 @@ function initMermaid(){
     theme:'base',
     fontFamily:'Inter, Pretendard Variable, sans-serif',
     themeVariables:isDark?{
-      primaryColor:'#252d39',primaryTextColor:'#d4d8de',primaryBorderColor:'#4a5568',
-      lineColor:'#6a7282',secondaryColor:'#1e2530',tertiaryColor:'#1a1f29',
+      // Dark — 절제된 차분한 톤
+      primaryColor:'#252d39',primaryTextColor:'#dcdfe5',primaryBorderColor:'#3a4250',
+      lineColor:'#5a6478',secondaryColor:'#1e242e',tertiaryColor:'#181d26',
       background:'#1a1f29',mainBkg:'#252d39',secondBkg:'#2a3340',
-      tertiaryBkg:'#1e2530',nodeBorder:'#5a6478',clusterBkg:'#1e2530',
-      clusterBorder:'#4a5568',edgeLabelBackground:'#1a1f29',
-      titleColor:'#e6edf3',textColor:'#d4d8de',labelTextColor:'#d4d8de',
-      noteTextColor:'#d4d8de',noteBkgColor:'#2a3340',noteBorderColor:'#5a6478'
+      tertiaryBkg:'#1e242e',nodeBorder:'#3a4250',clusterBkg:'#1c2229',
+      clusterBorder:'#2f3744',edgeLabelBackground:'#181d26',
+      titleColor:'#e6edf3',textColor:'#dcdfe5',labelTextColor:'#dcdfe5',
+      noteTextColor:'#dcdfe5',noteBkgColor:'#2a3340',noteBorderColor:'#3a4250',
+      // Sequence diagram 전용
+      actorBkg:'#2a3340',actorBorder:'#3a4250',actorTextColor:'#dcdfe5',
+      signalColor:'#9aa3b3',signalTextColor:'#9aa3b3',
+      labelBoxBkgColor:'#252d39',labelBoxBorderColor:'#3a4250',
+      labelTextColor:'#dcdfe5',loopTextColor:'#dcdfe5',
+      activationBkgColor:'#3a4250',activationBorderColor:'#5a6478',
+      sequenceNumberColor:'#1a1f29'
     }:{
-      primaryColor:'#faf8f4',primaryTextColor:'#3a3a3a',primaryBorderColor:'#b8b4b0',
-      lineColor:'#a8a4a0',secondaryColor:'#f0ece5',tertiaryColor:'#fdfcfa',
-      background:'#fdfcfa',mainBkg:'#faf8f4',secondBkg:'#f5f0e8',
-      tertiaryBkg:'#fdfcfa',nodeBorder:'#b8b4b0',clusterBkg:'#f5f0e8',
-      clusterBorder:'#c8c4c0',edgeLabelBackground:'#fdfcfa',
-      titleColor:'#3a3a3a',textColor:'#3a3a3a',labelTextColor:'#3a3a3a',
-      noteTextColor:'#3a3a3a',noteBkgColor:'#f0ece5',noteBorderColor:'#b8b4b0'
+      // Light — 따뜻하고 정성스러운 톤 (Claude 미학)
+      primaryColor:'#fdfbf5',primaryTextColor:'#3a3530',primaryBorderColor:'#c8bfae',
+      lineColor:'#b8ae9a',secondaryColor:'#f3eee0',tertiaryColor:'#faf6ec',
+      background:'#fbf9f4',mainBkg:'#fdfbf5',secondBkg:'#f3eee0',
+      tertiaryBkg:'#faf6ec',nodeBorder:'#c8bfae',clusterBkg:'#f6f1e3',
+      clusterBorder:'#d4caaf',edgeLabelBackground:'#fdfbf5',
+      titleColor:'#3a3530',textColor:'#3a3530',labelTextColor:'#3a3530',
+      noteTextColor:'#3a3530',noteBkgColor:'#f6efd9',noteBorderColor:'#d4caaf',
+      // Sequence diagram 전용
+      actorBkg:'#fdfbf5',actorBorder:'#c8bfae',actorTextColor:'#3a3530',
+      signalColor:'#8a8074',signalTextColor:'#5a5048',
+      labelBoxBkgColor:'#f6f1e3',labelBoxBorderColor:'#d4caaf',
+      labelTextColor:'#3a3530',loopTextColor:'#3a3530',
+      activationBkgColor:'#e8dfc4',activationBorderColor:'#c8bfae',
+      sequenceNumberColor:'#fbf9f4'
     }
   });
   document.querySelectorAll('.mermaid').forEach(d=>{
