@@ -306,7 +306,7 @@ insert
   
   # === 잡지 1종 ===
   $mg1 isa magazine,
-    has title "ACM Communications",
+    has title "Communications of the ACM",
     has added_year 2023,
     has issn "0001-0782",
     has publisher "ACM",
@@ -594,7 +594,7 @@ TypeDB의 `sub`는 *분류학적 위계*에 가깝다. 한 entity는 *정확히 
 
 TypeDB는 *Closed-World Assumption(CWA)*을 따른다. *데이터에 적혀 있지 않은 것은 거짓*으로 간주.
 
-예: *Journal of Web Semantics의 peer_reviewed가 true로 적혀 있다*. 그런데 *ACM Communications의 peer_reviewed는 적혀 있지 않다*. CWA에서 후자는 *peer_reviewed가 false다*가 아니라 *peer_reviewed에 대해 우리가 모른다*는 의미. `match $m isa magazine, has peer_reviewed true` 쿼리는 *ACM Communications를 답에 포함하지 않는다*.
+예: *Journal of Web Semantics의 peer_reviewed가 true로 적혀 있다*. 그런데 *Communications of the ACM의 peer_reviewed는 적혀 있지 않다*. CWA에서 후자는 *peer_reviewed가 false다*가 아니라 *peer_reviewed에 대해 우리가 모른다*는 의미. `match $m isa magazine, has peer_reviewed true` 쿼리는 *Communications of the ACM를 답에 포함하지 않는다*.
 
 RDF/OWL은 반대로 *Open-World Assumption(OWA)*. *적혀 있지 않은 것은 모른다*. 추론을 더 강력하게 하지만 — *직관에 어긋나는 경우*가 많다. TypeDB가 CWA를 택한 것은 — *실용적 데이터베이스의 직관*에 맞춤.
 

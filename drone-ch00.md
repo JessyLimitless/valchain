@@ -88,7 +88,7 @@ OWL 2의 *세 가지 profile*:
 Neo4j가 *property graph*를 대중화. *노드와 엣지에 자유로운 속성*을 다는 모양. RDF의 무거움을 벗어나 *그래프 쿼리의 자연스러움*을 얻었다. Cypher 쿼리:
 
 ```cypher
-MATCH (n:NVIDIA)-[:DESIGNS]->(c:Chip)
+MATCH (n:Company {name: "NVIDIA"})-[:DESIGNS]->(c:Chip)
 WHERE c.year > 2020
 RETURN c.name
 ```
@@ -223,7 +223,7 @@ Q: 데이터에 분류 가지가 있는가?
 ### 역할 (Role)
 
 - **이론적 자리**: 관계의 *participant*가 가지는 *qualified place*. *역할이 관계에 묶여 있고 개체에 묶여 있지 않다*는 통찰.
-- **철학적 뿌리**: Mihai Mihalca·Nicola Guarino의 *DOLCE Roles 분석*
+- **학술적 자리**: DOLCE 상위 온톨로지(Masolo·Vieu·Guarino 외, 2004 *Social Roles and their Descriptions*)와 OntoUML의 역할 분석
 - **TypeDB 도구**: `relates X`, `plays R:X`
 - **본격 자리**: 1부 예제 2 + 2부 전체
 
