@@ -697,7 +697,7 @@ TypeDB의 함수는 *기본적으로 on-the-fly* — 호출 시점에 fixpoint �
 - 교집합 / 차집합 / 매개변수 전파 / 단계별 필터링 / 임계점 sweep
 - 8장 시나리오에서 *실제 적용*
 
-**이론적 자리**
+**이론적 토대**
 - 합성성 — 함수의 교집합으로 답 도출
 - 쿼리 최적화 — predicate pushdown, join order, memoization
 - Stratified negation — 안전성 보장
