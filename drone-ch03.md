@@ -4,7 +4,7 @@
 
 세 번째 도구 — *함수*. TypeDB 3.0의 Function이 도입되면서, 데이터베이스가 *저장소*에서 *추론 엔진*으로 변환된다. 데이터에 적힌 *직접 관계*에서 *N단계 그래프*를 자동으로 펼치는 작업 — *재귀*가 그 핵심이다.
 
-이 장의 이론적 자리는 *Datalog 전통*. 1970~80년대 데이터베이스 이론의 가장 중요한 가지 중 하나가 — 이 자리에서 TypeDB 함수의 형식 의미론으로 살아 있다.
+이 장의 이론적 자리: *Datalog 전통*. 1970~80년대 데이터베이스 이론의 가장 중요한 가지 중 하나가 — 이 자리에서 TypeDB 함수의 형식 의미론으로 살아 있다.
 
 ---
 
@@ -16,6 +16,14 @@
 2. **소프트웨어 의존성**: 직장인이 일상적으로 다루는 자리. npm·pip·maven이 의존성 그래프를 펼치는 작업이 *정확히 같은 패턴*.
 
 두 도메인이 *같은 함수 패턴으로 풀린다*는 것이 — 이 장의 메타 메시지다. 도메인이 달라도 *그래프 + 재귀*가 같으면 함수는 같다.
+
+이 메시지의 더 큰 자리:
+- 가족 관계의 *조상 추적* — 부모-자녀 관계의 transitive closure
+- 공급망의 *모든 직간접 공급사* — supply 관계의 transitive closure
+- 학계의 *논문 인용 체인* — citation 관계의 transitive closure
+- 통신 메시의 *N홉 도달 가능성* — communicates_with의 transitive closure
+
+이 모든 자리가 — *같은 함수 패턴*. 한 도메인에서 익히면 *모든 도메인*에서 작동.
 
 ---
 
@@ -57,6 +65,23 @@ commit;
 ```
 
 두 도메인이 *같은 모양*의 N항 관계 — *주체-대상* 두 자리 + 카디널리티 1..1. 차이는 *어떤 개체가 어떤 자리에 들어가는가*뿐.
+
+### ◇ 설계 결정 — 이진 관계 (subordinate, supervisor)
+
+대안: *N항 관계 (multiple subordinates per supervisor)*
+```typeql
+relation reporting_unit,
+  relates supervisor @card(1..1),
+  relates subordinate @card(1..);
+```
+
+- 장점: *팀 단위*가 한 매듭. *Bob의 팀원들*이 한 인스턴스
+- 단점: *개별 보고 관계*를 별도로 식별하기 어려움
+- 단점: 한 부하가 *여러 상사*에게 보고하는 매트릭스 조직 표현 어색
+
+**채택: 이진 관계**
+- 각 *보고 관계*가 *개별 매듭*
+- *매트릭스 조직*도 자연스럽게 표현 (한 사람이 여러 보고 관계의 subordinate)
 
 ---
 
@@ -259,7 +284,131 @@ commit;
 
 ---
 
-## 3.8 Function의 한계와 자리
+## 3.8 ◇ 설계 결정 — Function 설계의 5가지 자리
+
+### 결정 1 — 재귀 vs 반복
+
+*직접 부하부터 깊은 부하까지*를 표현하는 방법:
+
+**반복적 접근** (이론적, TypeDB에서는 직접 표현 어려움):
+```pseudocode
+visited = {}
+queue = [manager]
+while queue:
+  current = queue.pop()
+  for sub in direct_reports_of(current):
+    if sub not in visited:
+      visited.add(sub)
+      queue.push(sub)
+return visited
+```
+
+**재귀적 접근** (TypeDB의 함수):
+```typeql
+fun all_subordinates_of($manager: person) -> { person }:
+  match (supervisor: $manager, subordinate: $direct) isa reports_to;
+  return { $direct };
+  or
+  match (supervisor: $manager, subordinate: $mid) isa reports_to;
+       let $deep in all_subordinates_of($mid);
+  return { $deep };
+```
+
+**TypeDB가 재귀를 채택한 이유**:
+- *선언적* — *무엇을* 답하는가만 적음. *어떻게*는 엔진 책임
+- *형식 의미론* 명확 — fixpoint
+- *순환 감지·중복 제거*가 엔진에 내장
+
+### 결정 2 — 깊이 제한 (depth-bounded recursion)
+
+기본 재귀는 *fixpoint까지* 완전히 펼침. 그러나 — *깊이 N까지만* 원할 수도.
+
+```typeql
+define
+  fun subordinates_within_depth(
+    $manager: person, 
+    $max_depth: long
+  ) -> { person }:
+    match
+      (supervisor: $manager, subordinate: $direct) isa reports_to;
+      $max_depth >= 1;
+    return { $direct };
+    
+    or
+    
+    match
+      (supervisor: $manager, subordinate: $mid) isa reports_to;
+      $max_depth >= 2;
+      let $deep in subordinates_within_depth($mid, $max_depth - 1);
+    return { $deep };
+```
+
+*깊이 2까지의 부하* = 직속 + 직속의 직속 (손자까지). 깊은 위계에서 *성능 보호* 또는 *부분 분석*에 유용.
+
+### 결정 3 — 집계 함수 (aggregate)
+
+함수가 *집합*이 아니라 *수치*를 반환할 수도.
+
+```typeql
+define
+  fun subordinate_count($manager: person) -> { long }:
+    match
+      let $sub in all_subordinates_of($manager);
+    return { count($sub) };
+```
+
+호출:
+```typeql
+match
+  $alice isa person, has name "Alice";
+  let $c in subordinate_count($alice);
+fetch $c;
+```
+
+답: 4.
+
+TypeDB 3.0은 `count`, `sum`, `min`, `max`, `avg` 같은 집계 함수를 지원. 함수가 *수치 분석 도구*도 됨.
+
+### 결정 4 — 다중 매개변수
+
+함수는 *여러 매개변수*를 받을 수 있다.
+
+```typeql
+define
+  fun common_supervisor(
+    $p1: person, 
+    $p2: person
+  ) -> { person }:
+    match
+      (supervisor: $sup, subordinate: $p1) isa reports_to;
+      (supervisor: $sup, subordinate: $p2) isa reports_to;
+    return { $sup };
+```
+
+*David와 Eve의 공통 상사* = Carol.
+
+다중 매개변수가 — *관계 추론*의 표현력을 크게 확장.
+
+### 결정 5 — 부정 (negation)
+
+`not { ... }`를 사용한 함수.
+
+```typeql
+define
+  fun leaf_nodes() -> { person }:
+    match
+      $p isa person;
+      not { (supervisor: $p) isa reports_to; };
+    return { $p };
+```
+
+*부하가 없는 사람* — 조직도의 *말단 노드*. David, Eve가 답.
+
+**짚어둘 자리**: 부정과 재귀의 결합은 *stratified negation* 조건을 준수해야. TypeDB가 자동 검증.
+
+---
+
+## 3.9 Function의 한계와 자리
 
 도구를 미화하지 않는다. 세 가지 한계를 짚어둔다.
 
@@ -273,18 +422,210 @@ TypeDB 엔진은 *순환 감지* 메커니즘을 가지고 있어 안전하게 �
 
 깊은 재귀 + 큰 데이터 = 느려질 수 있다. 1만 명 조직에서 *CEO의 모든 부하*를 묻는 쿼리가 *수십만 매듭*을 펼쳐야 한다면 — 응답 시간이 길어진다.
 
+#### 성능 특성 표
+
+| 그래프 크기 | 재귀 깊이 | 예상 응답 시간 |
+|---|---|---|
+| 100 노드 | ~3 | < 10ms |
+| 1,000 노드 | ~5 | ~50ms |
+| 10,000 노드 | ~7 | ~500ms |
+| 100,000 노드 | ~10 | ~5초 (depth-bounded 권장) |
+
 해결 방향:
-- 깊이 제한 추가 (depth-bounded recursion)
+- 깊이 제한 추가 (3.8 결정 2)
 - 결과 캐싱 (materialization)
 - 인덱스 활용 (TypeDB는 자동 인덱스)
 
 ### 한계 3 — 디버깅의 어려움
 
-재귀 함수가 *잘못된 답*을 반환할 때 — *어느 경로*가 잘못됐는지 추적이 일반 query보다 까다롭다. 처음에는 *작은 데이터*로 함수를 검증한 뒤 *큰 데이터*로 옮기는 작업 순서를 권한다.
+재귀 함수가 *잘못된 답*을 반환할 때 — *어느 경로*가 잘못됐는지 추적이 일반 query보다 까다롭다. Function 안에서 어떤 경로로 재귀가 펼쳐졌는지를 직접 보기 어렵기 때문이다.
+
+#### 디버깅 전략
+
+1. **작은 데이터로 격리** — 10개 매듭 이하로 줄이고 *수동으로 fixpoint 계산* 후 비교
+2. **기저와 재귀 분리** — 기저만 호출, 재귀를 한 단계만 펼침
+3. **중간 결과 검증** — `direct_reports_of` 같은 *비재귀 보조 함수*로 그래프 구조 확인
+4. **로그 추가** — TypeDB 3.0의 explain 기능 활용
+
+처음에는 *작은 데이터*로 함수를 검증한 뒤, *큰 데이터*로 옮기는 작업 순서를 권한다.
 
 ---
 
-## 3.9 ◇ 이론 절 — Datalog 전통과 Fixpoint 의미론
+## 3.10 실세계 평행 사례
+
+같은 *재귀 그래프 탐색* 패턴이 다른 도메인에서 어떻게 작동하는가.
+
+### npm dependency resolution
+
+JavaScript 패키지 매니저 npm은 *정확히 이 패턴*을 매일 실행한다.
+
+```bash
+npm install my-app
+# my-app의 모든 직간접 의존성을 자동 다운로드
+```
+
+내부적으로:
+1. `package.json`을 읽어 *직접 의존성* 목록 확보
+2. 각 직접 의존성의 *직접 의존성*을 재귀적으로 확보
+3. *transitive closure*가 fixpoint에 도달할 때까지 반복
+4. *순환 감지* — A → B → A는 경고
+5. *버전 충돌 해결* — 같은 패키지의 다른 버전 요구 시
+
+`all_dependencies_of` 함수가 — *npm 알고리즘의 일급 형식*이다.
+
+### Git ancestry
+
+`git log` 또는 `git blame` 같은 명령이 *커밋의 조상*을 찾는 작업.
+
+```bash
+git log --ancestry-path commit_A..commit_B
+# A에서 B까지의 조상 사슬
+```
+
+내부:
+- 각 커밋이 *parent 커밋들*을 가짐 (merge 커밋은 2명+)
+- *재귀적으로 parent를 따라감*
+- *graph traversal*
+
+`all_subordinates_of`의 *역방향* — *all_ancestors_of*가 정확히 같은 모양.
+
+### Gene Ontology
+
+생명과학의 *Gene Ontology(GO)*는 약 50,000개의 *생물학적 기능* 분류. 각 분류는 *상위 분류와 is-a / part-of 관계*.
+
+```
+metabolism
+└── carbohydrate metabolism
+    └── glucose metabolism
+        └── glucose-6-phosphate metabolism
+```
+
+*특정 기능의 모든 하위 기능*을 찾는 쿼리가 — 정확히 `all_subordinates_of` 패턴.
+
+### Wikipedia 카테고리
+
+위키피디아의 *카테고리 트리*. *컴퓨터 과학 > 데이터베이스 > 그래프 데이터베이스 > TypeDB*.
+
+*특정 카테고리의 모든 하위 카테고리*를 찾는 작업이 — 다시 같은 패턴.
+
+### 메시지: 도메인 무관성
+
+`all_X_of(start)` 형식의 함수가 *수많은 도메인에서 동일하게 작동*한다는 자리. 한 도메인에서 익히면 — 다른 도메인의 *같은 모양*을 즉시 알아본다.
+
+---
+
+## 3.11 잘못된 함수 vs 좋은 함수
+
+함수 설계의 *안티패턴*과 *좋은 패턴*.
+
+### 안티패턴 1 — 너무 큰 단일 함수
+
+```typeql
+fun analyze_organization($manager: person) -> { person }:
+  # 50줄의 복잡한 분석 — 부하 + 직속 상사 + 동료 + 특정 조건...
+  match ...; return ...;
+```
+
+**왜 나쁜가**:
+- *재사용 불가* — 50줄 중 일부만 필요한 자리에서 무용
+- *디버깅 불가능*
+- *함수의 의미*가 불명확
+
+**좋은 패턴**: 작은 함수 여러 개 + 합성
+```typeql
+fun direct_reports_of($p: person) -> { person }: ...;
+fun all_subordinates_of($p: person) -> { person }: ...;
+fun manager_of($p: person) -> { person }: ...;
+# 합성으로 큰 분석 짓기
+```
+
+### 안티패턴 2 — 매개변수 없는 함수의 남용
+
+```typeql
+fun all_engineers() -> { person }:
+  match $p isa person, has title "Engineer";
+  return { $p };
+```
+
+**왜 나쁜가**:
+- 도메인이 *Engineer*에 고정 — *Senior Engineer*에는 적용 불가
+- 새 직책마다 새 함수 — 함수 수가 폭발
+
+**좋은 패턴**: 매개변수화
+```typeql
+fun persons_with_title($title: string) -> { person }:
+  match $p isa person, has title $title;
+  return { $p };
+```
+
+### 안티패턴 3 — 재귀 없이 깊이 펼치기
+
+```typeql
+fun two_levels_below($manager: person) -> { person }:
+  match
+    (supervisor: $manager, subordinate: $mid) isa reports_to;
+    (supervisor: $mid, subordinate: $deep) isa reports_to;
+  return { $deep };
+```
+
+**왜 나쁜가**:
+- *깊이 2에 고정*. 3단계는?
+- *깊이 가변*에 대응 못함
+
+**좋은 패턴**: 재귀 함수 + 깊이 매개변수
+```typeql
+fun subordinates_within_depth($manager: person, $max_depth: long) -> { person }:
+  # 3.8 결정 2와 같은 모양
+  ...
+```
+
+### 안티패턴 4 — 부정과 재귀의 부주의한 결합
+
+```typeql
+fun no_subordinates_recursive($p: person) -> { person }:
+  not { let $sub in no_subordinates_recursive($p); };  # 자기 참조 부정!
+  return { $p };
+```
+
+**왜 나쁜가**:
+- *Stratified negation* 위반
+- *진리값 모순* — 자기 자신이 답에 있는가?
+- TypeDB 엔진이 *함수 정의 거부*
+
+**좋은 패턴**: 부정과 재귀를 *명확히 분리*
+```typeql
+fun has_subordinate($p: person) -> { boolean }:
+  match (supervisor: $p) isa reports_to;
+  return { true };
+
+fun leaf_nodes() -> { person }:
+  match $p isa person;
+  not { let $b in has_subordinate($p); };
+  return { $p };
+```
+
+부정이 *다른 함수의 결과*에만 적용 — stratification 보장.
+
+### 안티패턴 5 — 부작용 (side effect) 시도
+
+TypeDB의 함수는 *읽기 전용*. 데이터를 변경하지 않음. 만약 *함수 내에서 데이터 변경*을 시도하면 — 함수가 *순수 함수형*이 아니게 됨.
+
+**좋은 패턴**: 함수는 *읽기*, 데이터 변경은 *별도 트랜잭션*
+```typeql
+# 함수: 어떤 분석을 할 것인가
+fun candidates_to_promote() -> { person }: ...;
+
+# 트랜잭션: 분석 결과를 토대로 변경
+transaction write ...;
+match ... let $c in candidates_to_promote();
+insert (subordinate: $c, ...) isa reports_to ...;
+```
+
+이 분리가 — *데이터베이스의 무결성*과 *함수의 결정성*을 동시에 보장.
+
+---
+
+## 3.12 ◇ 이론 절 — Datalog 전통과 Fixpoint 의미론
 
 ### Datalog의 기원
 
@@ -315,6 +656,18 @@ fun ancestor_of($x: person) -> { person }:
 
 Datalog의 *Horn clause 두 개*가 TypeDB의 *재귀 함수 한 개*에 정확히 대응한다.
 
+### Datalog의 의미론적 성질
+
+Datalog가 *수십 년간 살아남은* 이유:
+
+1. **결정 가능 (Decidable)**: 모든 쿼리가 유한 시간에 종료. Prolog의 Turing-complete성을 *제한해서* 얻은 성질.
+
+2. **선언적 (Declarative)**: *무엇을* 답하는가만 적음. *어떻게* 계산하는가는 엔진 책임.
+
+3. **고차원 결합 (Higher-order composition)**: 함수가 함수를 호출 — 합성이 자연스러움.
+
+4. **모델 이론 (Model Theory)**: 모든 Datalog 프로그램은 *minimal model*을 가짐. 그게 *답*이다.
+
 ### Fixpoint 의미론
 
 *재귀 함수가 무엇을 의미하는가*에 대한 형식적 답이 *fixpoint semantics*다.
@@ -336,7 +689,17 @@ Datalog의 *Horn clause 두 개*가 TypeDB의 *재귀 함수 한 개*에 정확�
 
 답: {VP, Manager, Eng1, Eng2}.
 
-TypeDB 엔진은 이 fixpoint를 *효율적으로* 계산하는 알고리즘(semi-naïve evaluation 등)을 내장. 짜는 사람은 *기저와 재귀만 적으면* — 엔진이 fixpoint를 보장한다.
+### Semi-naïve evaluation
+
+TypeDB 엔진은 fixpoint를 *효율적으로* 계산한다. 단순(naïve) 방법은 *매번 처음부터 다시 계산*. Semi-naïve는 *이번 단계에서 새로 추가된 매듭만* 다음 재귀에 사용 — *중복 계산 회피*.
+
+```
+naïve:      F^(n+1) = F(F^n)
+semi-naïve: F^(n+1) = F^n ∪ F(ΔF^n)
+                       where ΔF^n = F^n - F^(n-1)
+```
+
+`ΔF^n`만 *다음 재귀의 입력*. 큰 그래프에서 *수백 배 빠름*.
 
 ### Stratified Negation의 안전성
 
@@ -349,13 +712,13 @@ fun has_no_subordinate($p: person) -> { boolean }:
   return { true };
 ```
 
-이 함수 안에서 *다시 자기 자신*을 재귀로 부르면 — *진리값이 결정되지 않는* 상황이 생길 수 있다 (paradox of self-reference).
+이 함수 안에서 *다시 자기 자신*을 재귀로 부르면 — *진리값이 결정되지 않는* 상황이 생길 수 있다 (paradox of self-reference). *Liar paradox*의 데이터베이스 버전.
 
 해결책: **Stratified negation**. 부정과 재귀를 *층(stratum)*으로 분리. 한 층의 함수는 *낮은 층의 함수만* 부정 절 안에서 호출 가능. TypeDB는 이 조건을 자동 검증.
 
 ### Closed-World Assumption과의 관계
 
-3.8에서 짚은 `has_no_subordinate`는 *CWA*를 전제로 한다. 데이터에 *Alice 밑에 부하가 적혀 있지 않다*면 — *Alice는 부하가 없다*고 결론. OWA에서는 *모른다*가 답.
+3.8에서 짚은 부정 함수는 *CWA*를 전제로 한다. 데이터에 *Alice 밑에 부하가 적혀 있지 않다*면 — *Alice는 부하가 없다*고 결론. OWA에서는 *모른다*가 답.
 
 TypeDB의 CWA는 *데이터베이스의 일반적 직관*에 맞춤. *부하가 적혀 있지 않으면 없다*가 — 실용적으로는 옳다.
 
@@ -381,12 +744,26 @@ rule manager_is_supervisor:
 | 합성 | 어려움 (규칙 사이의 명시적 호출 없음) | 자연스러움 (`let ... in`) |
 | 디버깅 | 어려움 (어느 규칙이 적용됐는지 추적 어려움) | 일반 함수처럼 추적 |
 | 형식 의미론 | 복잡함 (모든 규칙의 fixpoint) | 명확함 (호출된 함수의 fixpoint) |
+| 매개변수 | 없음 | 있음 (재사용성 큼) |
+| 반환 타입 | 데이터 변형 | 명시적 타입 |
 
 함수의 *합성성(compositionality)*이 — 추론 도구를 *프로그래밍의 일급 시민*으로 만들었다.
 
+### Datalog의 산업적 자리
+
+Datalog는 *학술의 자리*만이 아니다. 산업에서도 살아 있다:
+
+- **Datomic** (Rich Hickey의 데이터베이스) — Datalog 쿼리
+- **LogicBlox** — 비즈니스 분석에서 Datalog
+- **Yedalog** (Google) — 대규모 데이터 분석
+- **Soufflé** — 정적 분석에서 Datalog
+- **TypeDB** — 함수가 Datalog의 직계 후손
+
+40년 전의 *학술 전통*이 *2020년대 산업*에 살아 있는 자리.
+
 ---
 
-## 3.10 정리 — 1부 마무리
+## 3.13 정리 — 1부 마무리
 
 이 장에서 손에 들어온 것:
 
@@ -395,12 +772,35 @@ rule manager_is_supervisor:
 - `let $x in func($arg)`로 함수 호출
 - `or`로 분기되는 재귀
 - 함수 합성 — 한 함수의 출력에 추가 조건
+- 깊이 제한, 집계 함수, 다중 매개변수, 부정
+
+**설계 결정의 트레이드오프** (이 장의 결정적 추가)
+- 재귀 vs 반복
+- 깊이 제한의 의미와 적용
+- 집계 함수의 자리
+- 다중 매개변수의 표현력
+- 부정과 stratification
+
+**잘못된 함수 vs 좋은 함수**
+- 너무 큰 단일 함수의 위험
+- 매개변수화의 가치
+- 재귀의 올바른 사용
+- 부정과 재귀의 안전한 결합
+- 함수의 *읽기 전용* 성질
+
+**실세계 평행**
+- npm dependency resolution
+- Git ancestry
+- Gene Ontology
+- Wikipedia 카테고리
 
 **이론적 자리**
 - *Datalog 전통* — TypeDB 함수가 Horn clause에 대응
 - *Fixpoint 의미론* — 재귀 함수의 정답이 least fixpoint
+- *Semi-naïve evaluation*의 효율성
 - *Stratified negation*의 안전성
 - *Function vs Rule*의 설계 결정
+- Datalog의 *산업적 자리*
 
 ---
 
@@ -408,11 +808,11 @@ rule manager_is_supervisor:
 
 1부 세 장에서 손에 들어온 도구:
 
-| 장 | 도구 | 이론적 자리 |
-|---|---|---|
-| 1장 | 분류 (entity 상속) | Subtyping, LSP |
-| 2장 | N항 관계와 역할 (relation, plays) | Davidson 사건 의미론 |
-| 3장 | 함수와 재귀 (Function) | Datalog, Fixpoint |
+| 장 | 도구 | 이론적 자리 | 잘못된 사용 |
+|---|---|---|---|
+| 1장 | 분류 (entity 상속) | Subtyping, LSP, Rosch | 평면 모델, 너무 얕음 |
+| 2장 | N항 관계와 역할 (relation, plays) | Davidson 사건 의미론 | 이진 분해, attribute 일변도 |
+| 3장 | 함수와 재귀 (Function) | Datalog, Fixpoint | 큰 단일 함수, stratification 위반 |
 
 이 세 도구가 *동시에* 작동해야 풀리는 도메인이 — 2부의 드론 군집비행이다. 친숙한 예제에서 익힌 도구가 *진짜 실전*에서 어떻게 결합하는가 — 다음 부에서 본다.
 
